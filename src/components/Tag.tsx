@@ -2,9 +2,9 @@
 type Props = { children: React.ReactNode; variante?: "destaque" | "contorno"; tamanho?: "sm" | "md" | "lg"; className?: string };
 
 const tamanhos = {
-  sm: "px-2 py-1 text-xs leading-4",
-  md: "px-2 py-1.5 text-xs leading-4",
-  lg: "px-3 py-1.5 text-2xl leading-8 tracking-[-1px]",
+  sm: "px-2 py-1 text-100 leading-200",
+  md: "px-2 py-1.5 text-100 leading-200",
+  lg: "px-3 py-1.5 text-600 leading-600 tracking-snug",
 };
 
 export function Tag({ children, variante = "destaque", tamanho = "md", className = "" }: Props) {

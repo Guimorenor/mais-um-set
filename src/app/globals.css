@@ -9,6 +9,92 @@
   --font-serif: Georgia, "Times New Roman", serif;
 }
 
+/* Tipografia: só os tokens typography/* do Design System.
+   text-<passo> = typography/font-size/<passo> (já com a entrelinha correspondente),
+   leading-<passo> = typography/line-height/<passo>, tracking-<nome> = typography/letter-spacing/<nome>. */
+@theme {
+  --text-*: initial;
+  --text-50: 10px;
+  --text-50--line-height: 12px;
+  --text-75: 11px;
+  --text-75--line-height: 16px;
+  --text-100: 12px;
+  --text-100--line-height: 16px;
+  --text-150: 13px;
+  --text-150--line-height: 18px;
+  --text-200: 14px;
+  --text-200--line-height: 20px;
+  --text-250: 15px;
+  --text-250--line-height: 22px;
+  --text-300: 16px;
+  --text-300--line-height: 24px;
+  --text-400: 18px;
+  --text-400--line-height: 28px;
+  --text-500: 20px;
+  --text-500--line-height: 28px;
+  --text-550: 22px;
+  --text-550--line-height: 30px;
+  --text-600: 24px;
+  --text-600--line-height: 32px;
+  --text-650: 28px;
+  --text-650--line-height: 36px;
+  --text-700: 30px;
+  --text-700--line-height: 36px;
+  --text-750: 32px;
+  --text-750--line-height: 40px;
+  --text-800: 36px;
+  --text-800--line-height: 44px;
+  --text-850: 40px;
+  --text-850--line-height: 48px;
+  --text-900: 48px;
+  --text-900--line-height: 56px;
+  --text-950: 56px;
+  --text-950--line-height: 64px;
+  --text-1000: 60px;
+  --text-1000--line-height: 68px;
+  --text-1050: 64px;
+  --text-1050--line-height: 80px;
+  --text-1100: 72px;
+  --text-1100--line-height: 80px;
+  --text-1200: 80px;
+  --text-1200--line-height: 96px;
+  --text-1300: 96px;
+  --text-1300--line-height: 116px;
+  --leading-*: initial;
+  --leading-50: 12px;
+  --leading-100: 14px;
+  --leading-150: 18px;
+  --leading-200: 16px;
+  --leading-300: 20px;
+  --leading-350: 22px;
+  --leading-400: 24px;
+  --leading-450: 26px;
+  --leading-500: 28px;
+  --leading-550: 30px;
+  --leading-600: 32px;
+  --leading-700: 36px;
+  --leading-750: 40px;
+  --leading-800: 44px;
+  --leading-850: 48px;
+  --leading-900: 56px;
+  --leading-950: 64px;
+  --leading-1000: 68px;
+  --leading-1100: 80px;
+  --leading-1200: 96px;
+  --leading-1300: 116px;
+  --tracking-*: initial;
+  --tracking-tightest: -3px;
+  --tracking-tighter: -2px;
+  --tracking-tight: -1.5px;
+  --tracking-snug: -1px;
+  --tracking-none: 0px;
+  --tracking-slight: 0.5px;
+  --tracking-wide: 1px;
+  --tracking-relaxed: 2px;
+  --tracking-wider: 4px;
+  --tracking-widest: 8px;
+}
+
 body {
   background: var(--surface-page);
   color: var(--text-default);

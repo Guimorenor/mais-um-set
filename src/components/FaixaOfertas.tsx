@@ -15,7 +15,7 @@ export function FaixaOfertas() {
     <div aria-hidden={oculto} className="flex shrink-0 items-center gap-4 pr-4 lg:gap-8 lg:pr-8">
       {frases.map((f) => (
         <span key={f} className="flex items-center gap-4 lg:gap-8">
-          <span className="text-sm font-bold tracking-[0.28px] whitespace-nowrap uppercase lg:text-[22px] lg:tracking-[0.44px]">{f}</span>
+          <span className="text-200 font-bold tracking-slight whitespace-nowrap uppercase lg:text-550 lg:tracking-slight">{f}</span>
           <Icone nome="bolinha" tamanho={12} className="max-lg:size-2!" />
         </span>
       ))}

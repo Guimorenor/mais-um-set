@@ -44,7 +44,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
             href={site.whatsapp}
             target="_blank"
             rel="noopener"
-            className="flex h-12 shrink-0 items-center justify-center gap-3 rounded-lg bg-action-primary-default px-3 text-base leading-6 font-semibold text-text-on-brand transition-colors hover:bg-action-primary-hover lg:px-8"
+            className="flex h-12 shrink-0 items-center justify-center gap-3 rounded-lg bg-action-primary-default px-3 text-300 leading-400 font-semibold text-text-on-brand transition-colors hover:bg-action-primary-hover lg:px-8"
           >
             <span className="hidden lg:inline">Ofertas no WhatsApp</span>
             <span className="sr-only lg:hidden">Ofertas no WhatsApp</span>
@@ -74,7 +74,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
         <div className="flex items-center gap-2 rounded-full border border-border-subtle bg-surface-default p-2 shadow-[0_6px_18px_rgba(23,64,51,0.14)] lg:gap-4 lg:px-3 lg:py-2.5 lg:shadow-[0_8px_24px_rgba(23,64,51,0.12)]">
           <Link href="/" aria-label="Mais um Set — início" tabIndex={rolou ? 0 : -1} className="flex shrink-0 items-center gap-4">
             <Logo tipo="simbolo" altura={44} />
-            <span className="hidden text-xl font-bold whitespace-nowrap text-text-brand lg:inline">Mais um Set</span>
+            <span className="hidden text-500 font-bold whitespace-nowrap text-text-brand lg:inline">Mais um Set</span>
           </Link>
           <div className="flex min-w-0 flex-1 lg:hidden">
             <Busca placeholder="Buscar achados" tamanho="md" valor={busca} />
@@ -90,7 +90,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
             target="_blank"
             rel="noopener"
             tabIndex={rolou ? 0 : -1}
-            className="flex h-12 shrink-0 items-center justify-center gap-3 rounded-lg bg-action-accent-default px-3 text-base leading-6 font-semibold text-text-on-accent transition-colors hover:bg-action-accent-hover lg:px-8"
+            className="flex h-12 shrink-0 items-center justify-center gap-3 rounded-lg bg-action-accent-default px-3 text-300 leading-400 font-semibold text-text-on-accent transition-colors hover:bg-action-accent-hover lg:px-8"
           >
             <span className="hidden lg:inline">Ofertas no WhatsApp</span>
             <span className="sr-only lg:hidden">Ofertas no WhatsApp</span>
@@ -108,7 +108,7 @@ function AtalhoCategoria({ slug, nome, ativo }: { slug: CategoriaSlug; nome: str
       href={ativo ? "/#achados" : `/?categoria=${slug}#achados`}
       aria-current={ativo ? "page" : undefined}
       style={temaCategoria(slug)}
-      className={`flex shrink-0 snap-start items-center gap-2 rounded-full py-1.5 pr-4 pl-1.5 text-sm font-semibold whitespace-nowrap transition-colors ${
+      className={`flex shrink-0 snap-start items-center gap-2 rounded-full py-1.5 pr-4 pl-1.5 text-200 font-semibold whitespace-nowrap transition-colors ${
         ativo ? "bg-(--cat-surface) text-(--cat-text)" : "bg-surface-subtle text-text-default hover:bg-surface-sunken"
       }`}
     >

@@ -16,22 +16,22 @@ export function GradeOfertas({ ofertas, categoria, busca }: { ofertas: Oferta[];
 
   return (
     <section id="achados" className="scroll-mt-24 px-4 pt-4 pb-10 lg:px-20 lg:pt-8 lg:pb-16">
-      <div className="flex items-center justify-between gap-4 text-base font-semibold lg:text-2xl lg:leading-8 lg:tracking-[-1px]">
+      <div className="flex items-center justify-between gap-4 text-300 font-semibold lg:text-600 lg:leading-600 lg:tracking-snug">
         <h2 className="text-text-brand">{titulo}</h2>
-        <p className="shrink-0 text-sm text-text-subtlest lg:text-2xl">
+        <p className="shrink-0 text-200 text-text-subtlest lg:text-600">
           {n} {n === 1 ? "oferta" : "ofertas"}
           <span className="hidden lg:inline"> {n === 1 ? "disponível" : "disponíveis"}</span>
         </p>
       </div>
 
       {(categoria || busca) && (
-        <Link href="/#achados" scroll={false} className="mt-2 inline-block text-sm font-semibold text-text-link underline hover:text-text-link-hover">
+        <Link href="/#achados" scroll={false} className="mt-2 inline-block text-200 font-semibold text-text-link underline hover:text-text-link-hover">
           Ver todos os achados
         </Link>
       )}
 
       {n === 0 ? (
-        <p className="mt-8 text-lg text-text-subtle">Nenhum achado por aqui ainda. Tente outra busca ou categoria.</p>
+        <p className="mt-8 text-400 text-text-subtle">Nenhum achado por aqui ainda. Tente outra busca ou categoria.</p>
       ) : (
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-x-6 lg:gap-y-8 xl:grid-cols-3 2xl:grid-cols-4">
           {ofertas.map((o, i) => (
@@ -46,7 +46,7 @@ export function GradeOfertas({ ofertas, categoria, busca }: { ofertas: Oferta[];
         <button
           type="button"
           onClick={() => setVisiveisMobile((v) => v + POR_VEZ_MOBILE)}
-          className="mt-4 flex w-full items-center justify-center rounded-lg border border-border-default bg-action-secondary-default px-5 py-3 text-base leading-6 font-semibold text-text-subtle transition-colors hover:bg-action-secondary-hover lg:hidden"
+          className="mt-4 flex w-full items-center justify-center rounded-lg border border-border-default bg-action-secondary-default px-5 py-3 text-300 leading-400 font-semibold text-text-subtle transition-colors hover:bg-action-secondary-hover lg:hidden"
         >
           Carregar mais achados
         </button>

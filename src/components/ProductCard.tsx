@@ -21,9 +21,9 @@ export function ProductCard({ oferta }: { oferta: Oferta }) {
               alt=""
               className="pointer-events-none absolute top-[-53px] left-[-14px] h-[82px] w-24 object-cover"
             />
-            <span className="text-sm leading-5 font-semibold whitespace-nowrap text-(--cat-text)">{categoria?.nome}</span>
+            <span className="text-200 leading-300 font-semibold whitespace-nowrap text-(--cat-text)">{categoria?.nome}</span>
           </div>
-          <span className="rounded-full bg-action-subtle-default px-2 py-1 text-xs leading-4 font-semibold whitespace-nowrap text-text-subtle">
+          <span className="rounded-full bg-action-subtle-default px-2 py-1 text-100 leading-200 font-semibold whitespace-nowrap text-text-subtle">
             {oferta.loja}
           </span>
         </div>
@@ -31,13 +31,13 @@ export function ProductCard({ oferta }: { oferta: Oferta }) {
       <div className="flex flex-1 flex-col items-start gap-8 p-6">
         <div className="flex w-full flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <h3 className="text-lg leading-7 font-semibold text-text-brand">{oferta.titulo}</h3>
-            {oferta.observacao && <p className="text-base leading-6 text-text-subtle">{oferta.observacao}</p>}
+            <h3 className="text-400 leading-500 font-semibold text-text-brand">{oferta.titulo}</h3>
+            {oferta.observacao && <p className="text-300 leading-400 text-text-subtle">{oferta.observacao}</p>}
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-xl leading-7 font-semibold tracking-[-1px] text-text-subtle">{formatarPreco(oferta.precoDe)}</p>
+            <p className="text-500 leading-500 font-semibold tracking-snug text-text-subtle">{formatarPreco(oferta.precoDe)}</p>
             <div className="flex items-center gap-2">
-              <p className="text-4xl leading-[44px] font-bold tracking-[-1.5px] whitespace-nowrap text-text-brand">
+              <p className="text-800 leading-800 font-bold tracking-tight whitespace-nowrap text-text-brand">
                 {formatarPreco(oferta.precoPor)}
               </p>
               <Tag>-{desconto(oferta)}%</Tag>
@@ -48,7 +48,7 @@ export function ProductCard({ oferta }: { oferta: Oferta }) {
           href={oferta.link}
           target="_blank"
           rel="sponsored noopener"
-          className="mt-auto flex h-10 items-center justify-center gap-2 rounded-lg bg-action-primary-default px-4 text-sm leading-5 font-semibold whitespace-nowrap text-text-on-brand transition-colors hover:bg-action-primary-hover group-hover:bg-action-primary-hover"
+          className="mt-auto flex h-10 items-center justify-center gap-2 rounded-lg bg-action-primary-default px-4 text-200 leading-300 font-semibold whitespace-nowrap text-text-on-brand transition-colors hover:bg-action-primary-hover group-hover:bg-action-primary-hover"
         >
           Ver oferta na loja
           <Icone nome="link-externo" tamanho={20} />

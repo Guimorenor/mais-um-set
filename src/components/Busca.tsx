@@ -16,7 +16,7 @@ export function Busca({ placeholder, tamanho = "lg", valor }: { placeholder: str
           name="busca"
           defaultValue={valor}
           placeholder={placeholder}
-          className="min-w-0 flex-1 bg-transparent text-base leading-6 text-text-default outline-none placeholder:text-text-placeholder"
+          className="min-w-0 flex-1 bg-transparent text-300 leading-400 text-text-default outline-none placeholder:text-text-placeholder"
         />
       </label>
     </form>

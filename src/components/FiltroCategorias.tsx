@@ -7,10 +7,10 @@ export function FiltroCategorias({ ativa }: { ativa?: CategoriaSlug }) {
   return (
     <section className="flex flex-col gap-4 pt-8 pb-4 lg:gap-8 lg:px-20 lg:pt-16 lg:pb-0">
       <div className="flex flex-col gap-1 px-4 lg:flex-row lg:items-center lg:justify-between lg:px-0">
-        <h2 className="font-serif text-[29.44px] leading-[1.2] tracking-[-0.46px] text-text-brand lg:text-[64px] lg:tracking-[-1px]">
+        <h2 className="font-serif text-700  tracking-snug text-text-brand lg:text-1050 lg:tracking-snug">
           Qual é a desculpa de hoje?
         </h2>
-        <p className="text-[15px] font-semibold text-text-subtle lg:text-2xl lg:leading-8 lg:tracking-[-1px]">
+        <p className="text-250 font-semibold text-text-subtle lg:text-600 lg:leading-600 lg:tracking-snug">
           Escolha uma categoria para ver os achados.
         </p>
       </div>
@@ -39,13 +39,13 @@ export function FiltroCategorias({ ativa }: { ativa?: CategoriaSlug }) {
               />
               <span className="flex flex-col items-center whitespace-nowrap">
                 <span
-                  className={`text-[13.2px] leading-[17.6px] font-semibold tracking-[-0.5px] lg:text-2xl lg:leading-8 lg:tracking-[-1px] ${
+                  className={`text-200 leading-300 font-semibold tracking-snug lg:text-600 lg:leading-600 lg:tracking-snug ${
                     selecionado ? "text-(--cat-on-accent)" : "text-text-brand"
                   }`}
                 >
                   {c.mascote}
                 </span>
-                <span className={`text-[11px] leading-4 lg:text-sm lg:leading-5 ${selecionado ? "text-(--cat-on-accent)" : "text-text-subtle"}`}>
+                <span className={`text-50 lg:text-200 lg:leading-300 ${selecionado ? "text-(--cat-on-accent)" : "text-text-subtle"}`}>
                   {c.nome}
                 </span>
               </span>
