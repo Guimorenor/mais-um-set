@@ -1,11 +1,30 @@
 @import "tailwindcss";
 @import "./tokens.css";
 
+/* "dark:" do Tailwind segue o tema do site (data-theme), inclusive em trechos travados no escuro */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme inline {
   --font-sans: "Inter Variable", system-ui, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
 }
 
 body {
   background: var(--surface-page);
   color: var(--text-default);
+}
+
+/* Faixa de ofertas correndo de lado */
+@keyframes faixa {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.faixa-anima {
+  animation: faixa 40s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .faixa-anima {
+    animation: none;
+  }
 }

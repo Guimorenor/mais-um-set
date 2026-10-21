@@ -125,6 +125,7 @@
   --p-rosa-1000: #180b11;
 
   /* Semânticos — modo claro */
+  color-scheme: light;
   --surface-page: var(--p-neutral-50);
   --surface-default: var(--p-neutral-0);
   --surface-subtle: var(--p-neutral-100);
@@ -216,6 +217,8 @@
   --category-cordas-on-accent: var(--p-rosa-900);
   --text-on-accent: var(--p-primary-800);
   --icon-on-accent: var(--p-primary-800);
+  /* overlay/scrim = neutral-900 a 60% (igual nos dois modos) */
+  --surface-scrim: color-mix(in srgb, var(--p-neutral-900) 60%, transparent);
 }
 
 /* Modo escuro: segue o sistema, a menos que a pessoa tenha escolhido no switch */
@@ -315,7 +318,10 @@
   }
 }
 
-:root[data-theme="dark"] {
+/* Também vale para trechos travados no escuro (ex.: destaque do hero e rodapé) */
+:root[data-theme="dark"],
+[data-theme="dark"] {
+  color-scheme: dark;
   --surface-page: var(--p-primary-1000);
   --surface-default: var(--p-primary-900);
   --surface-subtle: var(--p-primary-800);
@@ -502,4 +508,5 @@
   --color-category-cordas-on-accent: var(--category-cordas-on-accent);
   --color-text-on-accent: var(--text-on-accent);
   --color-icon-on-accent: var(--icon-on-accent);
+  --color-surface-scrim: var(--surface-scrim);
 }
