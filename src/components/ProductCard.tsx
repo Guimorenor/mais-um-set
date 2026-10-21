@@ -12,7 +12,7 @@ export function ProductCard({ oferta }: { oferta: Oferta }) {
   return (
     <article
       style={temaCategoria(oferta.categoria)}
-      className="group relative flex w-full flex-col overflow-hidden rounded-[32px] border border-border-default bg-surface-default shadow-[0_8px_16px_-4px_rgba(17,25,38,0.12),0_4px_8px_-2px_rgba(17,25,38,0.06)] transition-[transform,box-shadow,border-color] duration-500 ease-suave hover:-translate-y-1.5 hover:border-border-brand hover:shadow-[0_24px_48px_-12px_rgba(17,25,38,0.22),0_8px_16px_-6px_rgba(17,25,38,0.10)]"
+      className="group relative flex w-full flex-col overflow-hidden rounded-[32px] border border-border-default bg-surface-default shadow-[0_8px_16px_-4px_rgba(17,25,38,0.12),0_4px_8px_-2px_rgba(17,25,38,0.06)] transition-[transform,scale,translate,rotate,box-shadow,border-color] duration-500 ease-suave hover:-translate-y-1.5 hover:border-border-brand hover:shadow-[0_24px_48px_-12px_rgba(17,25,38,0.22),0_8px_16px_-6px_rgba(17,25,38,0.10)]"
     >
       <div className="relative h-[414px] shrink-0 overflow-hidden bg-surface-default">
         <img
@@ -59,13 +59,13 @@ export function ProductCard({ oferta }: { oferta: Oferta }) {
           href={oferta.link}
           target="_blank"
           rel="sponsored noopener"
-          className="mt-auto flex h-10 items-center justify-center gap-2 rounded-full bg-action-primary-default px-4 text-200 leading-300 font-semibold whitespace-nowrap text-text-on-brand transition-[background-color,transform] duration-300 ease-suave group-hover:bg-action-primary-hover active:scale-95 after:absolute after:inset-0 after:content-['']"
+          className="mt-auto flex h-10 items-center justify-center gap-2 rounded-full bg-action-primary-default px-4 text-200 leading-300 font-semibold whitespace-nowrap text-text-on-brand transition-[background-color,transform,scale,translate,rotate] duration-300 ease-suave origin-left group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-action-primary-hover active:scale-95 after:absolute after:inset-0 after:content-['']"
         >
           Ver oferta na loja
           <Icone
             nome="link-externo"
             tamanho={20}
-            className="transition-transform duration-300 ease-suave group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+           
           />
         </a>
       </div>

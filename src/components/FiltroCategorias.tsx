@@ -32,9 +32,9 @@ export function FiltroCategorias({ ativa }: { ativa?: CategoriaSlug }) {
               scroll={false}
               aria-current={selecionado ? "true" : undefined}
               style={temaCategoria(c.slug)}
-              className={`group flex h-[136px] shrink-0 snap-start flex-col items-center justify-center gap-0.5 rounded-3xl p-2 transition-[background-color,opacity,transform] duration-300 ease-suave active:scale-[0.97] md:h-[247px] md:min-w-[197px] md:gap-1 md:p-4 lg:flex-1 ${
+              className={`group flex h-[136px] shrink-0 snap-start flex-col items-center justify-center gap-0.5 rounded-3xl p-2 transition-[background-color,opacity,transform,scale,translate,rotate] duration-300 ease-suave active:scale-[0.97] md:h-[247px] md:min-w-[197px] md:gap-1 md:p-4 lg:flex-1 ${
                 selecionado ? "bg-(--cat-accent)" : "hover:bg-(--cat-surface)"
-              } ${esmaecido ? "opacity-50 hover:opacity-100" : ""}`}
+              } ${esmaecido ? "opacity-45 hover:opacity-100" : ""}`}
             >
               <img
                 src={imagemMascote(c.slug)}

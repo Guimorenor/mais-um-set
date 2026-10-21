@@ -45,7 +45,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
             href={site.whatsapp}
             target="_blank"
             rel="noopener"
-            className="flex h-12 min-w-12 shrink-0 items-center justify-center gap-3 rounded-full bg-action-primary-default px-3 text-300 leading-400 font-semibold text-text-on-brand transition-[background-color,transform] duration-300 ease-suave hover:bg-action-primary-hover active:scale-95 lg:px-8"
+            className="flex h-12 min-w-12 shrink-0 items-center justify-center gap-3 rounded-full bg-action-primary-default px-3 text-300 leading-400 font-semibold text-text-on-brand transition-[background-color,transform,scale,translate,rotate] duration-300 ease-suave hover:-translate-y-0.5 hover:scale-105 hover:bg-action-primary-hover active:scale-95 lg:px-8"
           >
             <span className="hidden lg:inline">Ofertas no WhatsApp</span>
             <span className="sr-only lg:hidden">Ofertas no WhatsApp</span>
@@ -84,10 +84,10 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
             </span>
           </Link>
           <div className="flex min-w-0 flex-1 lg:hidden">
-            <Busca placeholder="Buscar achados" tamanho="md" valor={busca} />
+            <Busca placeholder="Buscar achados" tamanho="md" valor={busca} variante="vidro" />
           </div>
           <div className="hidden min-w-0 flex-1 lg:flex">
-            <Busca placeholder="Buscar produtos ou marcas" valor={busca} />
+            <Busca placeholder="Buscar produtos ou marcas" valor={busca} variante="vidro" />
           </div>
           <div className="hidden lg:block">
             <AlternarTema />
@@ -97,7 +97,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
             target="_blank"
             rel="noopener"
             tabIndex={rolou ? 0 : -1}
-            className="flex h-12 min-w-12 shrink-0 items-center justify-center gap-3 rounded-full bg-action-accent-default px-3 text-300 leading-400 font-semibold text-text-on-accent transition-[background-color,transform] duration-300 ease-suave hover:bg-action-accent-hover active:scale-95 lg:px-8"
+            className="flex h-12 min-w-12 shrink-0 items-center justify-center gap-3 rounded-full bg-action-accent-default px-3 text-300 leading-400 font-semibold text-text-on-accent transition-[background-color,transform,scale,translate,rotate] duration-300 ease-suave hover:-translate-y-0.5 hover:scale-105 hover:bg-action-accent-hover active:scale-95 lg:px-8"
           >
             <span className="hidden lg:inline">Ofertas no WhatsApp</span>
             <span className="sr-only lg:hidden">Ofertas no WhatsApp</span>

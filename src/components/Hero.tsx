@@ -93,9 +93,9 @@ function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
         target="_blank"
         rel="sponsored noopener"
         aria-label={`Ver oferta: ${oferta.titulo}`}
-        className="absolute right-0 bottom-0 flex h-[90px] w-[117px] items-center justify-center rounded-3xl bg-action-primary-default text-text-on-brand transition-[background-color,transform] duration-300 ease-suave group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
+        className="absolute right-0 bottom-0 flex h-[90px] w-[117px] items-center justify-center rounded-3xl bg-action-primary-default text-text-on-brand transition-[background-color,transform,scale,translate,rotate] duration-300 ease-suave origin-bottom-right group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
       >
-        <Icone nome="link-externo" tamanho={40} className="transition-transform duration-300 ease-suave group-hover:translate-x-1 group-hover:-translate-y-1" />
+        <Icone nome="link-externo" tamanho={40} />
       </a>
     </article>
   );
@@ -126,9 +126,9 @@ function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
         target="_blank"
         rel="sponsored noopener"
         aria-label={`Ver oferta: ${oferta.titulo}`}
-        className="absolute right-0 bottom-0 flex h-[72px] w-[88px] items-center justify-center rounded-[20px] bg-action-primary-default text-text-on-brand transition-[background-color,transform] duration-300 ease-suave group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
+        className="absolute right-0 bottom-0 flex h-[72px] w-[88px] items-center justify-center rounded-[20px] bg-action-primary-default text-text-on-brand transition-[background-color,transform,scale,translate,rotate] duration-300 ease-suave origin-bottom-right group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
       >
-        <Icone nome="link-externo" tamanho={32} className="transition-transform duration-300 ease-suave group-hover:translate-x-1 group-hover:-translate-y-1" />
+        <Icone nome="link-externo" tamanho={32} />
       </a>
     </article>
   );
@@ -159,9 +159,9 @@ function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
         target="_blank"
         rel="sponsored noopener"
         aria-label={`Ver oferta: ${oferta.titulo}`}
-        className="absolute right-0 bottom-0 flex h-12 w-[60px] items-center justify-center rounded-2xl bg-action-primary-default text-text-on-brand transition-[background-color,transform] duration-300 ease-suave group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
+        className="absolute right-0 bottom-0 flex h-12 w-[60px] items-center justify-center rounded-2xl bg-action-primary-default text-text-on-brand transition-[background-color,transform,scale,translate,rotate] duration-300 ease-suave origin-bottom-right group-hover:-translate-x-0.5 group-hover:-translate-y-0.5 group-hover:scale-105 group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
       >
-        <Icone nome="link-externo" tamanho={28} className="transition-transform duration-300 ease-suave group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+        <Icone nome="link-externo" tamanho={28} />
       </a>
     </article>
   );
@@ -217,10 +217,10 @@ function AchadoDaVez() {
           href={o.link}
           target="_blank"
           rel="sponsored noopener"
-          className="group/botao vidro flex h-12 w-full items-center justify-center gap-3 self-start rounded-full px-5 text-300 leading-400 font-semibold text-text-default transition-[background-color,transform] duration-300 ease-suave [--vidro-fundo:var(--surface-glass-thin)] hover:[--vidro-fundo:var(--surface-glass)] active:scale-95 sm:w-auto"
+          className="group/botao vidro flex h-12 w-full items-center justify-center gap-3 self-start rounded-full px-5 text-300 leading-400 font-semibold text-text-default transition-[background-color,transform,scale,translate,rotate] duration-300 ease-suave [--vidro-fundo:var(--surface-glass-thin)] hover:-translate-y-0.5 hover:scale-105 hover:[--vidro-fundo:var(--surface-glass)] active:scale-95 sm:w-auto"
         >
           Ver oferta na loja
-          <Icone nome="link-externo" tamanho={24} className="transition-transform duration-300 ease-suave group-hover/botao:translate-x-0.5 group-hover/botao:-translate-y-0.5" />
+          <Icone nome="link-externo" tamanho={24} />
         </a>
       </div>
 

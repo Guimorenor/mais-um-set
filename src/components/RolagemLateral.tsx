@@ -60,7 +60,7 @@ export function RolagemLateral({
       onClick={() => rolar(direcao)}
       aria-label={direcao === 1 ? "Ver mais à direita" : "Ver mais à esquerda"}
       tabIndex={visivel ? 0 : -1}
-      className={`vidro absolute top-1/2 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full text-icon-default transition-[opacity,transform,scale] duration-300 ease-suave hover:scale-110 active:scale-95 pointer-fine:flex ${
+      className={`vidro absolute top-1/2 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full text-icon-default transition-[opacity,transform,scale,translate,rotate,scale] duration-300 ease-suave hover:scale-110 active:scale-95 pointer-fine:flex ${
         direcao === 1 ? posicaoSetas.direita : posicaoSetas.esquerda
       } ${visivel ? "opacity-100" : "pointer-events-none scale-75 opacity-0"}`}
     >
