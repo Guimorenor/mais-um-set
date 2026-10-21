@@ -217,6 +217,17 @@
   --category-cordas-on-accent: var(--p-rosa-900);
   --text-on-accent: var(--p-primary-800);
   --icon-on-accent: var(--p-primary-800);
+  /* Glass (DS: color/glass/*, opacity/glass/*, opacity/stroke/*, opacity/highlight/*) */
+  --glass-light-regular: color-mix(in srgb, var(--p-neutral-0) 72%, transparent);
+  --glass-light-thin: color-mix(in srgb, var(--p-neutral-0) 56%, transparent);
+  --glass-dark-regular: color-mix(in srgb, var(--p-neutral-900) 76%, transparent);
+  --glass-dark-thin: color-mix(in srgb, var(--p-neutral-900) 64%, transparent);
+  --glass-highlight-top: color-mix(in srgb, #fff 55%, transparent);
+  --glass-highlight-top-subtle: color-mix(in srgb, #fff 22%, transparent);
+  --glass-highlight-bottom: color-mix(in srgb, #000 18%, transparent);
+  --surface-glass: var(--glass-light-regular);
+  --surface-glass-thin: var(--glass-light-thin);
+  --border-glass: color-mix(in srgb, #fff 40%, transparent);
   /* overlay/scrim = neutral-900 a 60% (igual nos dois modos) */
   --surface-scrim: color-mix(in srgb, var(--p-neutral-900) 60%, transparent);
 }
@@ -315,6 +326,9 @@
     --category-cordas-on-accent: var(--p-rosa-900);
     --text-on-accent: var(--p-primary-900);
     --icon-on-accent: var(--p-primary-900);
+    --surface-glass: var(--glass-dark-regular);
+    --surface-glass-thin: var(--glass-dark-thin);
+    --border-glass: color-mix(in srgb, #fff 14%, transparent);
   }
 }
 
@@ -413,6 +427,9 @@
   --category-cordas-on-accent: var(--p-rosa-900);
   --text-on-accent: var(--p-primary-900);
   --icon-on-accent: var(--p-primary-900);
+  --surface-glass: var(--glass-dark-regular);
+  --surface-glass-thin: var(--glass-dark-thin);
+  --border-glass: color-mix(in srgb, #fff 14%, transparent);
 }
 
 /* Expõe os tokens semânticos como cores do Tailwind: bg-surface-page, text-text-brand... */
@@ -509,4 +526,7 @@
   --color-text-on-accent: var(--text-on-accent);
   --color-icon-on-accent: var(--icon-on-accent);
   --color-surface-scrim: var(--surface-scrim);
+  --color-surface-glass: var(--surface-glass);
+  --color-surface-glass-thin: var(--surface-glass-thin);
+  --color-border-glass: var(--border-glass);
 }

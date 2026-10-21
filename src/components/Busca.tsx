@@ -5,7 +5,7 @@ export function Busca({ placeholder, tamanho = "lg", valor }: { placeholder: str
   return (
     <form action="/" className="min-w-0 flex-1" role="search">
       <label
-        className={`flex w-full items-center gap-2 rounded-lg border border-border-input bg-surface-default text-icon-subtle focus-within:border-border-focus focus-within:outline focus-within:outline-1 focus-within:outline-border-focus ${
+        className={`flex w-full items-center gap-2 rounded-full border border-border-input bg-surface-default text-icon-subtle focus-within:border-border-focus focus-within:outline focus-within:outline-1 focus-within:outline-border-focus ${
           tamanho === "lg" ? "px-4 py-3" : "px-3 py-2"
         }`}
       >

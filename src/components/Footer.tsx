@@ -37,10 +37,10 @@ export function Footer() {
           href={site.whatsapp}
           target="_blank"
           rel="noopener"
-          className="mt-6 flex shrink-0 items-center justify-center gap-3 rounded-lg bg-action-accent-default px-8 py-[18px] text-center text-400 leading-400 font-semibold text-text-on-accent md:self-start md:whitespace-nowrap lg:self-auto transition-colors hover:bg-action-accent-hover lg:mt-0"
+          className="group mt-6 flex shrink-0 items-center justify-center gap-3 rounded-full bg-action-accent-default px-8 py-[18px] text-center text-400 leading-400 font-semibold text-text-on-accent md:self-start md:whitespace-nowrap lg:self-auto transition-[background-color,transform] duration-300 ease-suave hover:bg-action-accent-hover active:scale-95 lg:mt-0"
         >
           Entrar no grupo de ofertas
-          <Icone nome="whatsapp" tamanho={24} />
+          <Icone nome="whatsapp" tamanho={24} className="transition-transform duration-500 ease-suave group-hover:-rotate-12 group-hover:scale-110" />
         </a>
       </div>
 

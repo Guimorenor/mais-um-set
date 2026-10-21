@@ -1,24 +1,20 @@
-import { Icone } from "./Icone";
+// Divisor de seção: faixa lima com a marca e o slogan passando bem devagar.
+// Para quando o mouse está em cima e fica parada para quem pede menos movimento.
+const frases = ["Mais um Set", "Jogue mais, gaste menos"];
 
-const frases = [
-  "Jogue mais, gaste menos",
-  "Promoção boa é igual ace: passa rápido",
-  "Até 30% off em raquetes",
-  "Achados novos todo dia",
-  "Deuce no preço? Aqui não",
-  "Bola dentro no seu bolso",
-];
-
-// Divisor de seção: faixa lima com frases que correm de lado.
 export function FaixaOfertas() {
   const sequencia = (oculto: boolean) => (
-    <div aria-hidden={oculto} className="flex shrink-0 items-center gap-4 pr-4 md:gap-6 md:pr-6 lg:gap-8 lg:pr-8">
-      {frases.map((f) => (
-        <span key={f} className="flex items-center gap-4 md:gap-6 lg:gap-8">
-          <span className="text-200 font-bold tracking-slight whitespace-nowrap uppercase md:text-400 lg:text-550">{f}</span>
-          <Icone nome="bolinha" tamanho={12} className="max-md:size-2! md:max-lg:size-2.5!" />
-        </span>
-      ))}
+    <div aria-hidden={oculto} className="flex shrink-0 items-center">
+      {Array.from({ length: 4 }, (_, i) =>
+        frases.map((f) => (
+          <span
+            key={`${i}-${f}`}
+            className="px-8 text-200 font-bold tracking-slight whitespace-nowrap uppercase md:px-12 md:text-400 lg:px-16 lg:text-550"
+          >
+            {f}
+          </span>
+        )),
+      )}
     </div>
   );
   return (

@@ -68,12 +68,12 @@ function DePor({ oferta, className = "" }: { oferta: Oferta; className?: string 
 
 function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
   return (
-    <article className="relative h-[314px] min-w-0 flex-1 overflow-hidden">
+    <article className="group relative h-[314px] min-w-0 flex-1 overflow-hidden">
       <FundoRecortado raio={64} raioRecorte={24} larguraRecorte={125.44} alturaRecorte={97.7} />
       <img
         src={oferta.imagem}
         alt=""
-        className="pointer-events-none absolute top-7 right-[18px] h-[167px] w-[135px] object-contain"
+        className="pointer-events-none absolute top-7 right-[18px] h-[167px] w-[135px] object-contain transition-transform duration-500 ease-suave group-hover:-translate-y-2 group-hover:-rotate-3 group-hover:scale-105"
       />
       <div className="absolute top-[37px] left-6 flex w-[237px] flex-col items-start gap-3">
         <Tag tamanho="sm">{rotuloCategoria(oferta)}</Tag>
@@ -93,9 +93,9 @@ function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
         target="_blank"
         rel="sponsored noopener"
         aria-label={`Ver oferta: ${oferta.titulo}`}
-        className="absolute right-0 bottom-0 flex h-[90px] w-[117px] items-center justify-center rounded-3xl bg-action-primary-default text-text-on-brand transition-colors hover:bg-action-primary-hover"
+        className="absolute right-0 bottom-0 flex h-[90px] w-[117px] items-center justify-center rounded-3xl bg-action-primary-default text-text-on-brand transition-[background-color,transform] duration-300 ease-suave group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
       >
-        <Icone nome="link-externo" tamanho={40} />
+        <Icone nome="link-externo" tamanho={40} className="transition-transform duration-300 ease-suave group-hover:translate-x-1 group-hover:-translate-y-1" />
       </a>
     </article>
   );
@@ -103,12 +103,12 @@ function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
 
 function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
   return (
-    <article className="relative flex h-60 min-w-0 flex-1 flex-col gap-5 overflow-hidden p-6">
+    <article className="group relative flex h-60 min-w-0 flex-1 flex-col gap-5 overflow-hidden p-6">
       <FundoRecortado raio={40} raioRecorte={20} larguraRecorte={96} alturaRecorte={80} />
       <img
         src={oferta.imagem}
         alt=""
-        className="pointer-events-none absolute top-4 right-5 h-[140px] w-[130px] object-contain"
+        className="pointer-events-none absolute top-4 right-5 h-[140px] w-[130px] object-contain transition-transform duration-500 ease-suave group-hover:-translate-y-2 group-hover:-rotate-3 group-hover:scale-105"
       />
       <div className="relative flex flex-col items-start gap-2 pr-[120px]">
         <Tag tamanho="sm">{rotuloCategoria(oferta)}</Tag>
@@ -126,9 +126,9 @@ function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
         target="_blank"
         rel="sponsored noopener"
         aria-label={`Ver oferta: ${oferta.titulo}`}
-        className="absolute right-0 bottom-0 flex h-[72px] w-[88px] items-center justify-center rounded-[20px] bg-action-primary-default text-text-on-brand transition-colors hover:bg-action-primary-hover"
+        className="absolute right-0 bottom-0 flex h-[72px] w-[88px] items-center justify-center rounded-[20px] bg-action-primary-default text-text-on-brand transition-[background-color,transform] duration-300 ease-suave group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
       >
-        <Icone nome="link-externo" tamanho={32} />
+        <Icone nome="link-externo" tamanho={32} className="transition-transform duration-300 ease-suave group-hover:translate-x-1 group-hover:-translate-y-1" />
       </a>
     </article>
   );
@@ -136,12 +136,12 @@ function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
 
 function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
   return (
-    <article className="relative flex h-[175px] w-[300px] shrink-0 snap-start flex-col gap-4 overflow-hidden p-4">
+    <article className="group relative flex h-[175px] w-[300px] shrink-0 snap-start flex-col gap-4 overflow-hidden p-4">
       <FundoRecortado raio={32} raioRecorte={20} larguraRecorte={64.44} alturaRecorte={52.7} />
       <img
         src={oferta.imagem}
         alt=""
-        className="pointer-events-none absolute top-[3px] right-[22px] h-[114px] w-[105px] object-contain"
+        className="pointer-events-none absolute top-[3px] right-[22px] h-[114px] w-[105px] object-contain transition-transform duration-500 ease-suave group-hover:-translate-y-2 group-hover:-rotate-3 group-hover:scale-105"
       />
       <div className="relative flex flex-col items-start gap-2 pr-[110px]">
         <Tag tamanho="sm">{rotuloCategoria(oferta)}</Tag>
@@ -159,9 +159,9 @@ function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
         target="_blank"
         rel="sponsored noopener"
         aria-label={`Ver oferta: ${oferta.titulo}`}
-        className="absolute right-0 bottom-0 flex h-12 w-[60px] items-center justify-center rounded-2xl bg-action-primary-default text-text-on-brand transition-colors hover:bg-action-primary-hover"
+        className="absolute right-0 bottom-0 flex h-12 w-[60px] items-center justify-center rounded-2xl bg-action-primary-default text-text-on-brand transition-[background-color,transform] duration-300 ease-suave group-hover:bg-action-primary-hover active:scale-95 after:absolute after:-inset-[999px] after:content-['']"
       >
-        <Icone nome="link-externo" tamanho={28} />
+        <Icone nome="link-externo" tamanho={28} className="transition-transform duration-300 ease-suave group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
       </a>
     </article>
   );
@@ -173,16 +173,16 @@ function AchadoDaVez() {
   return (
     <article
       data-theme="dark"
-      className="relative flex flex-col gap-3 overflow-hidden rounded-[28px] bg-surface-overlay px-5 pt-5 pb-6 text-text-default md:flex-row md:items-center md:gap-6 md:rounded-[40px] md:p-10 md:pr-6 lg:h-[558px] lg:rounded-[64px] lg:p-0"
+      className="group/achado relative flex flex-col gap-3 overflow-hidden rounded-[28px] bg-surface-overlay px-5 pt-5 pb-6 text-text-default md:flex-row md:items-center md:gap-6 md:rounded-[40px] md:p-10 md:pr-6 lg:h-[558px] lg:rounded-[64px] lg:p-0"
     >
-      <img src="/home/hero-quadra.webp" alt="" className="pointer-events-none absolute inset-0 size-full object-cover" />
+      <img src="/home/hero-quadra.webp" alt="" className="pointer-events-none absolute inset-0 size-full object-cover transition-transform duration-[1200ms] ease-suave group-hover/achado:scale-[1.03]" />
 
       {/* raquete (espelhada, como no Figma) */}
       <div className="pointer-events-none absolute top-[42px] left-[122px] h-[267px] w-[228px] -scale-x-100 overflow-hidden md:relative md:top-auto md:left-auto md:order-last md:h-[336px] md:w-[44%] md:shrink-0 lg:absolute lg:top-8 lg:right-8 lg:h-[477px] lg:w-[min(406px,calc(100%-480px))]">
         <img
           src={o.imagem}
           alt=""
-          className="absolute top-[-4.58%] left-[-14.14%] h-[107.74%] w-[126.6%] max-w-none md:top-0 md:left-0 md:size-full md:max-w-full md:object-contain"
+          className="absolute top-[-4.58%] left-[-14.14%] h-[107.74%] w-[126.6%] max-w-none md:top-0 md:left-0 md:size-full md:max-w-full md:object-contain transition-transform duration-700 ease-suave group-hover/achado:-translate-y-2 group-hover/achado:rotate-3"
         />
       </div>
 
@@ -217,10 +217,10 @@ function AchadoDaVez() {
           href={o.link}
           target="_blank"
           rel="sponsored noopener"
-          className="flex h-12 w-full items-center justify-center gap-3 self-start rounded-lg border border-border-default bg-action-secondary-default px-5 text-300 leading-400 font-semibold text-text-subtle transition-colors hover:bg-action-secondary-hover md:w-auto"
+          className="group/botao vidro flex h-12 w-full items-center justify-center gap-3 self-start rounded-full px-5 text-300 leading-400 font-semibold text-text-default transition-[background-color,transform] duration-300 ease-suave [--vidro-fundo:var(--surface-glass-thin)] hover:[--vidro-fundo:var(--surface-glass)] active:scale-95 md:w-auto"
         >
           Ver oferta na loja
-          <Icone nome="link-externo" tamanho={24} />
+          <Icone nome="link-externo" tamanho={24} className="transition-transform duration-300 ease-suave group-hover/botao:translate-x-0.5 group-hover/botao:-translate-y-0.5" />
         </a>
       </div>
 
@@ -229,16 +229,16 @@ function AchadoDaVez() {
           href={o.link}
           target="_blank"
           rel="sponsored noopener"
-          className="absolute right-9 bottom-[31px] hidden h-[167px] w-[268px] overflow-hidden rounded-[32px] bg-text-default p-2 lg:max-[1700px]:block min-[1920px]:block"
+          className="group/video absolute right-9 bottom-[31px] hidden transition-transform duration-500 ease-suave hover:-translate-y-1 h-[167px] w-[268px] overflow-hidden rounded-[32px] bg-text-default p-2 lg:max-[1700px]:block min-[1920px]:block"
         >
           <span className="relative block h-[200px] overflow-hidden rounded-[28px]">
-            <img src={o.video.thumb} alt="" className="absolute top-[-30.9%] left-0 h-[241.5%] w-full max-w-none" />
+            <img src={o.video.thumb} alt="" className="absolute top-[-30.9%] left-0 h-[241.5%] w-full max-w-none transition-transform duration-700 ease-suave group-hover/video:scale-105" />
             <span className="absolute inset-0 bg-surface-scrim" />
           </span>
           <span className="absolute inset-x-0 bottom-0 flex items-center justify-center rounded-b-[32px] bg-action-accent-default p-2 text-400 leading-500 font-semibold text-text-on-accent">
             {o.video.chamada}
           </span>
-          <span className="absolute top-[calc(50%-0.5px)] left-1/2 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-surface-scrim text-white">
+          <span className="absolute top-[calc(50%-0.5px)] left-1/2 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center vidro rounded-full text-white [--vidro-desfoque:4px] [--vidro-fundo:var(--surface-scrim)]">
             <Icone nome="play" tamanho={19} />
           </span>
         </a>

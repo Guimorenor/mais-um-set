@@ -35,7 +35,7 @@ export function GradeOfertas({ ofertas, categoria, busca }: { ofertas: Oferta[];
       ) : (
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:mt-6 md:gap-y-6 lg:gap-x-6 lg:gap-y-8 xl:grid-cols-3 2xl:grid-cols-4">
           {ofertas.map((o, i) => (
-            <div key={o.id} className={`flex ${i >= visiveisMobile ? "max-lg:hidden" : ""}`}>
+            <div key={o.id} className={`surgir flex ${i >= visiveisMobile ? "max-lg:hidden" : ""}`}>
               <ProductCard oferta={o} />
             </div>
           ))}
@@ -46,7 +46,7 @@ export function GradeOfertas({ ofertas, categoria, busca }: { ofertas: Oferta[];
         <button
           type="button"
           onClick={() => setVisiveisMobile((v) => v + POR_VEZ_MOBILE)}
-          className="mt-4 flex w-full items-center md:mx-auto md:mt-6 md:w-fit justify-center rounded-lg border border-border-default bg-action-secondary-default px-5 py-3 text-300 leading-400 font-semibold text-text-subtle transition-colors hover:bg-action-secondary-hover lg:hidden"
+          className="mt-4 flex w-full items-center md:mx-auto md:mt-6 md:w-fit justify-center rounded-full border border-border-default bg-action-secondary-default px-5 py-3 text-300 leading-400 font-semibold text-text-subtle transition-colors hover:bg-action-secondary-hover lg:hidden"
         >
           Carregar mais achados
         </button>
