@@ -23,11 +23,11 @@ export function Footer() {
   ];
 
   return (
-    <footer data-theme="dark" className="flex flex-col gap-8 bg-surface-default px-4 pt-10 pb-8 text-text-default lg:gap-14 lg:px-20 lg:pt-20 lg:pb-10">
-      <div className="flex flex-col gap-0 rounded-[28px] bg-surface-subtle px-5 py-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:rounded-[40px] lg:px-14 lg:py-12">
+    <footer data-theme="dark" className="flex flex-col gap-8 bg-surface-default px-4 pt-10 pb-8 text-text-default md:gap-10 md:px-6 md:pt-12 md:pb-10 lg:gap-14 lg:px-20 lg:pt-20 lg:pb-10">
+      <div className="flex flex-col gap-0 rounded-[28px] bg-surface-subtle px-5 py-6 md:rounded-[32px] md:p-10 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:rounded-[40px] lg:px-14 lg:py-12">
         <div className="flex flex-col gap-3">
           <p className="text-200 font-bold tracking-wide text-text-brand">GRUPO DE OFERTAS · GRÁTIS</p>
-          <p className="text-650  font-bold lg:max-w-[900px] lg:text-900">Receba os achados antes de todo mundo.</p>
+          <p className="text-650 font-bold md:text-800 md:tracking-snug lg:max-w-[900px] lg:text-900 lg:tracking-none">Receba os achados antes de todo mundo.</p>
           <p className="text-250 leading-400 text-text-subtle lg:max-w-[760px] lg:text-400 ">
             Entre no nosso canal do WhatsApp: as melhores promoções de raquete, bolinha e tênis chegam direto no seu celular.
             Sem spam, só oferta boa.
@@ -37,7 +37,7 @@ export function Footer() {
           href={site.whatsapp}
           target="_blank"
           rel="noopener"
-          className="mt-6 flex shrink-0 items-center justify-center gap-3 rounded-lg bg-action-accent-default px-8 py-[18px] text-center text-400 leading-400 font-semibold text-text-on-accent lg:whitespace-nowrap transition-colors hover:bg-action-accent-hover lg:mt-0"
+          className="mt-6 flex shrink-0 items-center justify-center gap-3 rounded-lg bg-action-accent-default px-8 py-[18px] text-center text-400 leading-400 font-semibold text-text-on-accent md:self-start md:whitespace-nowrap lg:self-auto transition-colors hover:bg-action-accent-hover lg:mt-0"
         >
           Entrar no grupo de ofertas
           <Icone nome="whatsapp" tamanho={24} />
@@ -51,9 +51,9 @@ export function Footer() {
             Os melhores achados do tênis, num só lugar. A gente garimpa, você só escolhe.
           </p>
         </div>
-        <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 lg:mt-0 lg:flex lg:gap-20">
+        <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 md:flex md:gap-16 lg:mt-0 lg:gap-20">
           {colunas.map((col) => (
-            <div key={col.titulo} className="flex min-w-0 flex-col gap-3 lg:whitespace-nowrap">
+            <div key={col.titulo} className="flex min-w-0 flex-col gap-3 md:whitespace-nowrap">
               <p className="text-150 font-bold tracking-wide text-text-subtlest uppercase">{col.titulo}</p>
               {col.itens.map((i) => (
                 <Link key={i.nome} href={i.href} className="text-300 font-semibold hover:text-text-brand">

@@ -25,20 +25,20 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
   return (
     <>
       {/* Estado "Topo" */}
-      <header className="flex flex-col gap-3 border-b border-border-subtle bg-surface-default py-3 lg:gap-0 lg:py-0">
-        <div className="flex items-center gap-2 px-4 lg:gap-8 lg:px-20 lg:pt-5 lg:pb-3">
+      <header className="flex flex-col gap-3 border-b border-border-subtle bg-surface-default py-3 md:gap-0 md:py-0">
+        <div className="flex items-center gap-2 px-4 md:gap-4 md:px-6 md:pt-5 md:pb-3 lg:gap-8 lg:px-20">
           <Link href="/" aria-label="Mais um Set — início" className="shrink-0">
-            <span className="flex lg:hidden">
+            <span className="flex md:hidden">
               <Logo altura={42} />
             </span>
-            <span className="hidden lg:flex">
+            <span className="hidden md:flex">
               <Logo altura={56} />
             </span>
           </Link>
-          <div className="hidden flex-1 lg:flex">
+          <div className="hidden flex-1 md:flex">
             <Busca placeholder="Buscar produtos ou marcas" valor={busca} />
           </div>
-          <span className="flex-1 lg:hidden" />
+          <span className="flex-1 md:hidden" />
           <AlternarTema />
           <a
             href={site.whatsapp}
@@ -51,12 +51,12 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
             <Icone nome="whatsapp" tamanho={24} />
           </a>
         </div>
-        <div className="flex px-4 lg:hidden">
+        <div className="flex px-4 md:hidden">
           <Busca placeholder="Buscar achados" tamanho="md" valor={busca} />
         </div>
         <nav
           aria-label="Categorias"
-          className="flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] lg:scroll-px-20 lg:gap-3 lg:px-20 lg:pt-1 lg:pb-4"
+          className="flex snap-x scroll-px-4 gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:scroll-px-6 md:gap-3 md:px-6 md:pt-1 md:pb-4 lg:scroll-px-20 lg:px-20"
         >
           {categorias.map((c) => (
             <AtalhoCategoria key={c.slug} slug={c.slug} nome={c.nome} ativo={c.slug === categoriaAtiva} />
