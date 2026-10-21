@@ -113,7 +113,8 @@ body {
   backdrop-filter: blur(var(--vidro-desfoque, 16px)) saturate(140%);
   box-shadow:
     inset 0 1px 0 var(--glass-highlight-top-subtle),
-    inset 0 0 0 1px var(--border-glass);
+    inset 0 0 0 1px var(--border-glass),
+    var(--vidro-sombra, 0 0 #0000);
 }
 
 /* Faixa de ofertas: passa bem devagar e para quando o mouse está em cima */

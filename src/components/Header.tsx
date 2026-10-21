@@ -74,7 +74,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
           rolou ? "translate-y-0 opacity-100" : "pointer-events-none -translate-y-4 opacity-0"
         }`}
       >
-        <div className="flex items-center gap-2 rounded-full border border-border-subtle bg-surface-default p-2 shadow-[0_6px_18px_rgba(23,64,51,0.14)] lg:gap-4 lg:px-3 lg:py-2.5 lg:shadow-[0_8px_24px_rgba(23,64,51,0.12)]">
+        <div className="vidro flex items-center gap-2 rounded-full p-2 [--vidro-sombra:0_6px_18px_rgba(23,64,51,0.14)] lg:gap-4 lg:px-3 lg:py-2.5 lg:[--vidro-sombra:0_8px_24px_rgba(23,64,51,0.12)]">
           <Link href="/" aria-label="Mais um Set — início" tabIndex={rolou ? 0 : -1} className="flex shrink-0 items-center gap-4">
             <span className="flex lg:hidden">
               <Logo tipo="simbolo" altura={40} />

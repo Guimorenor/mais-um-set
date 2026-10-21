@@ -18,7 +18,7 @@ export function FaixaOfertas() {
     </div>
   );
   return (
-    <div className="flex h-11 items-center overflow-hidden bg-action-accent-default text-text-on-accent md:h-14 lg:h-[72px]">
+    <div className="flex h-8 items-center overflow-hidden bg-action-accent-default text-text-on-accent md:h-10 lg:h-12">
       <div className="faixa-anima flex">
         {sequencia(false)}
         {sequencia(true)}
