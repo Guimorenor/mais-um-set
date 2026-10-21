@@ -14,14 +14,14 @@ export function ProductCard({ oferta }: { oferta: Oferta }) {
     >
       <div className="relative h-[414px] shrink-0 overflow-hidden bg-surface-default">
         <img src={oferta.imagem} alt={oferta.titulo} className="absolute inset-0 size-full object-cover" loading="lazy" />
-        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between bg-(--cat-surface) p-4">
-          <div className="relative flex items-center pl-20">
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-(--cat-surface) p-4">
+          <div className="relative flex min-w-0 items-center pl-20">
             <img
               src={imagemMascote(oferta.categoria)}
               alt=""
               className="pointer-events-none absolute top-[-53px] left-[-14px] h-[82px] w-24 object-cover"
             />
-            <span className="text-200 leading-300 font-semibold whitespace-nowrap text-(--cat-text)">{categoria?.nome}</span>
+            <span className="text-200 leading-300 font-semibold text-(--cat-text)">{categoria?.nome}</span>
           </div>
           <span className="rounded-full bg-action-subtle-default px-2 py-1 text-100 leading-200 font-semibold whitespace-nowrap text-text-subtle">
             {oferta.loja}

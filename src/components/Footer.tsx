@@ -37,7 +37,7 @@ export function Footer() {
           href={site.whatsapp}
           target="_blank"
           rel="noopener"
-          className="mt-6 flex shrink-0 items-center justify-center gap-3 rounded-lg bg-action-accent-default px-8 py-[18px] text-400 leading-400 font-semibold whitespace-nowrap text-text-on-accent transition-colors hover:bg-action-accent-hover lg:mt-0"
+          className="mt-6 flex shrink-0 items-center justify-center gap-3 rounded-lg bg-action-accent-default px-8 py-[18px] text-center text-400 leading-400 font-semibold text-text-on-accent lg:whitespace-nowrap transition-colors hover:bg-action-accent-hover lg:mt-0"
         >
           Entrar no grupo de ofertas
           <Icone nome="whatsapp" tamanho={24} />
@@ -53,7 +53,7 @@ export function Footer() {
         </div>
         <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 lg:mt-0 lg:flex lg:gap-20">
           {colunas.map((col) => (
-            <div key={col.titulo} className="flex flex-col gap-3 whitespace-nowrap">
+            <div key={col.titulo} className="flex min-w-0 flex-col gap-3 lg:whitespace-nowrap">
               <p className="text-150 font-bold tracking-wide text-text-subtlest uppercase">{col.titulo}</p>
               {col.itens.map((i) => (
                 <Link key={i.nome} href={i.href} className="text-300 font-semibold hover:text-text-brand">
