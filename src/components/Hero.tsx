@@ -7,7 +7,7 @@ import { Tag } from "./Tag";
 
 export function Hero() {
   return (
-    <section className="flex flex-col gap-4 px-4 py-6 md:gap-6 md:px-6 md:pt-10 lg:gap-8 lg:px-20 lg:py-16 2xl:flex-row">
+    <section className="flex flex-col gap-4 px-4 py-6 md:gap-6 md:px-6 md:pt-10 lg:gap-8 lg:px-20 lg:py-16 min-[1700px]:flex-row">
       <div className="flex min-w-0 flex-1 flex-col gap-4 md:gap-6 lg:gap-8">
         <div className="flex flex-col gap-4 lg:gap-2">
           <h1 className="font-serif text-900 tracking-snug text-text-brand md:text-1050 lg:text-1200">
@@ -173,22 +173,26 @@ function AchadoDaVez() {
   return (
     <article
       data-theme="dark"
-      className="relative flex flex-col gap-3 overflow-hidden rounded-[28px] bg-surface-overlay px-5 pt-5 pb-6 text-text-default md:gap-4 md:rounded-[40px] md:p-10 lg:h-[558px] lg:rounded-[64px] lg:p-0"
+      className="relative flex flex-col gap-3 overflow-hidden rounded-[28px] bg-surface-overlay px-5 pt-5 pb-6 text-text-default md:flex-row md:items-center md:gap-6 md:rounded-[40px] md:p-10 md:pr-6 lg:h-[558px] lg:rounded-[64px] lg:p-0"
     >
       <img src="/home/hero-quadra.webp" alt="" className="pointer-events-none absolute inset-0 size-full object-cover" />
 
       {/* raquete (espelhada, como no Figma) */}
-      <div className="pointer-events-none absolute top-[42px] left-[122px] h-[267px] w-[228px] -scale-x-100 overflow-hidden md:top-2 md:right-6 md:left-auto md:h-[400px] md:w-[342px] lg:top-8 lg:right-auto lg:left-[462px] lg:h-[477px] lg:w-[406px]">
-        <img src={o.imagem} alt="" className="absolute top-[-4.58%] left-[-14.14%] h-[107.74%] w-[126.6%] max-w-none" />
+      <div className="pointer-events-none absolute top-[42px] left-[122px] h-[267px] w-[228px] -scale-x-100 overflow-hidden md:relative md:top-auto md:left-auto md:order-last md:h-[336px] md:w-[44%] md:shrink-0 lg:absolute lg:top-8 lg:right-8 lg:h-[477px] lg:w-[min(406px,calc(100%-480px))]">
+        <img
+          src={o.imagem}
+          alt=""
+          className="absolute top-[-4.58%] left-[-14.14%] h-[107.74%] w-[126.6%] max-w-none md:top-0 md:left-0 md:size-full md:max-w-full md:object-contain"
+        />
       </div>
 
-      <div className="relative flex flex-col gap-3 md:gap-4 lg:absolute lg:top-1/2 lg:left-[60px] lg:w-[466px] lg:-translate-y-1/2 lg:gap-12">
+      <div className="relative flex flex-col gap-3 md:min-w-0 md:flex-1 md:gap-4 lg:absolute lg:top-1/2 lg:left-[60px] lg:w-[466px] lg:-translate-y-1/2 lg:gap-12">
         <div className="flex flex-col gap-3 lg:gap-2">
           <div className="flex gap-2">
             <Tag>{o.rotulo}</Tag>
             <Tag variante="contorno">Achado da vez</Tag>
           </div>
-          <h2 className="w-[190px] text-700 font-black md:w-[380px] md:text-900 md:tracking-tighter lg:w-auto lg:text-1000">
+          <h2 className="w-[190px] text-700 font-black md:w-auto md:text-900 md:tracking-tighter lg:w-auto lg:text-1000">
             {o.titulo}
           </h2>
         </div>
@@ -225,7 +229,7 @@ function AchadoDaVez() {
           href={o.link}
           target="_blank"
           rel="sponsored noopener"
-          className="absolute right-9 bottom-[31px] hidden h-[167px] w-[268px] overflow-hidden rounded-[32px] bg-text-default p-2 lg:block"
+          className="absolute right-9 bottom-[31px] hidden h-[167px] w-[268px] overflow-hidden rounded-[32px] bg-text-default p-2 lg:max-[1700px]:block min-[1920px]:block"
         >
           <span className="relative block h-[200px] overflow-hidden rounded-[28px]">
             <img src={o.video.thumb} alt="" className="absolute top-[-30.9%] left-0 h-[241.5%] w-full max-w-none" />
