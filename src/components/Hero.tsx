@@ -136,7 +136,7 @@ function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
 
 function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
   return (
-    <article className="group relative flex h-[175px] w-[300px] shrink-0 snap-start flex-col gap-4 overflow-hidden p-4">
+    <article className="group relative flex h-[175px] w-[300px] shrink-0 snap-start sm:w-auto sm:min-w-[300px] sm:flex-1 flex-col gap-4 overflow-hidden p-4">
       <FundoRecortado raio={32} raioRecorte={20} larguraRecorte={64.44} alturaRecorte={52.7} />
       <img
         src={oferta.imagem}
@@ -178,11 +178,11 @@ function AchadoDaVez() {
       <img src="/home/hero-quadra.webp" alt="" className="pointer-events-none absolute inset-0 size-full object-cover transition-transform duration-[1200ms] ease-suave group-hover/achado:scale-[1.03]" />
 
       {/* raquete (espelhada, como no Figma) */}
-      <div className="pointer-events-none absolute top-[42px] left-[122px] h-[267px] w-[228px] -scale-x-100 overflow-hidden md:relative md:top-auto md:left-auto md:order-last md:h-[336px] md:w-[44%] md:shrink-0 lg:absolute lg:top-8 lg:right-8 lg:h-[477px] lg:w-[min(406px,calc(100%-480px))]">
+      <div className="pointer-events-none absolute top-[42px] right-2 h-[267px] w-[228px] -scale-x-100 overflow-hidden sm:top-3 sm:bottom-3 sm:h-auto sm:w-[34%] md:relative md:bottom-auto md:top-auto md:right-auto md:order-last md:h-[336px] md:w-[44%] md:shrink-0 lg:absolute lg:top-8 lg:right-8 lg:h-[477px] lg:w-[min(406px,calc(100%-480px))]">
         <img
           src={o.imagem}
           alt=""
-          className="absolute top-[-4.58%] left-[-14.14%] h-[107.74%] w-[126.6%] max-w-none md:top-0 md:left-0 md:size-full md:max-w-full md:object-contain transition-transform duration-700 ease-suave group-hover/achado:-translate-y-2 group-hover/achado:rotate-3"
+          className="absolute top-[-4.58%] left-[-14.14%] h-[107.74%] w-[126.6%] max-w-none sm:top-0 sm:left-0 sm:size-full sm:max-w-full sm:object-contain transition-transform duration-700 ease-suave group-hover/achado:-translate-y-2 group-hover/achado:rotate-3"
         />
       </div>
 
@@ -192,7 +192,7 @@ function AchadoDaVez() {
             <Tag>{o.rotulo}</Tag>
             <Tag variante="contorno">Achado da vez</Tag>
           </div>
-          <h2 className="w-[190px] text-700 font-black md:w-auto md:text-900 md:tracking-tighter lg:w-auto lg:text-1000">
+          <h2 className="max-w-[60%] text-700 font-black md:max-w-none md:text-900 md:tracking-tighter lg:w-auto lg:text-1000">
             {o.titulo}
           </h2>
         </div>
@@ -217,7 +217,7 @@ function AchadoDaVez() {
           href={o.link}
           target="_blank"
           rel="sponsored noopener"
-          className="group/botao vidro flex h-12 w-full items-center justify-center gap-3 self-start rounded-full px-5 text-300 leading-400 font-semibold text-text-default transition-[background-color,transform] duration-300 ease-suave [--vidro-fundo:var(--surface-glass-thin)] hover:[--vidro-fundo:var(--surface-glass)] active:scale-95 md:w-auto"
+          className="group/botao vidro flex h-12 w-full items-center justify-center gap-3 self-start rounded-full px-5 text-300 leading-400 font-semibold text-text-default transition-[background-color,transform] duration-300 ease-suave [--vidro-fundo:var(--surface-glass-thin)] hover:[--vidro-fundo:var(--surface-glass)] active:scale-95 sm:w-auto"
         >
           Ver oferta na loja
           <Icone nome="link-externo" tamanho={24} className="transition-transform duration-300 ease-suave group-hover/botao:translate-x-0.5 group-hover/botao:-translate-y-0.5" />
