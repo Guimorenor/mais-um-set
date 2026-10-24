@@ -43,6 +43,18 @@ const CAMPOS_CATALOGO: [string, (p: Obj) => unknown][] = [
   ["Link do produto", (p) => p.permalink],
 ];
 
+const CAMPOS_OFERTA: [string, (o: Obj) => unknown][] = [
+  ["Anúncio", (o) => o.item_id],
+  ["Preço", (o) => o.price],
+  ["Preço anterior", (o) => o.original_price],
+  ["Moeda", (o) => o.currency_id],
+  ["Vendedor", (o) => o.seller_id],
+  ["Loja oficial", (o) => o.official_store_id],
+  ["Condição", (o) => o.condition],
+  ["Frete grátis", (o) => (o.shipping as Obj | undefined)?.free_shipping],
+  ["Estoque", (o) => o.available_quantity],
+];
+
 function resumo(valor: unknown): string {
   if (valor === undefined || valor === null || valor === "") return "";
   if (Array.isArray(valor)) {
@@ -86,6 +98,7 @@ export default async function ProvaMercadoLivre({ searchParams }: Props) {
   const testes: { nome: string; r: Resposta }[] = [];
   let item: Record<string, unknown> | null = null;
   let produto: Record<string, unknown> | null = null;
+  let ofertasCatalogo: Obj[] = [];
   if (token && id && id.tipo !== "erro") {
     const busca = await consultar("/sites/MLB/search?q=raquete%20head&limit=1", token);
     const conta = await consultar("/users/me", token);
@@ -110,6 +123,7 @@ export default async function ProvaMercadoLivre({ searchParams }: Props) {
         { nome: `Ofertas do catálogo (/products/${codigoCatalogo}/items)`, r: ofertas },
       );
       if (produtoR.ok) produto = produtoR.corpo as Record<string, unknown>;
+      if (ofertas.ok) ofertasCatalogo = ((ofertas.corpo as { results?: Obj[] } | null)?.results ?? []).slice(0, 5);
       const vencedor = (produto?.buy_box_winner as { item_id?: string } | undefined)?.item_id;
       if (vencedor && !item) {
         const comToken = await consultar(`/items?ids=${vencedor}`, token);
@@ -199,6 +213,33 @@ export default async function ProvaMercadoLivre({ searchParams }: Props) {
             </table>
           ) : (
             <p className="mt-2 text-300">Nenhum dado de anúncio retornado — veja os códigos HTTP acima.</p>
+          )}
+
+          {ofertasCatalogo.length > 0 && (
+            <>
+              <h3 className="mt-6 text-400 font-semibold text-text-brand">Ofertas do catálogo (até 5 vendedores)</h3>
+              <p className="mt-1 text-200 text-text-subtle">
+                Campos que vieram: <code className="break-all">{Object.keys(ofertasCatalogo[0]).join(", ")}</code>
+              </p>
+              <div className="mt-2 overflow-x-auto">
+                <table className="w-full text-left text-200">
+                  <thead>
+                    <tr className="text-text-subtlest">
+                      {CAMPOS_OFERTA.map(([rotulo]) => <th key={rotulo} className="py-2 pr-3">{rotulo}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ofertasCatalogo.map((o, i) => (
+                      <tr key={i} className="border-t border-border-default align-top">
+                        {CAMPOS_OFERTA.map(([rotulo, valor]) => (
+                          <td key={rotulo} className="py-2 pr-3 break-all">{resumo(valor(o)) || "—"}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
 
           {produto && (
