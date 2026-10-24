@@ -8,7 +8,7 @@
 // Links encurtados (meli.la) não trazem o código: é preciso a URL original.
 
 export type IdMercadoLivre =
-  | { tipo: "anuncio"; id: string }
+  | { tipo: "anuncio"; id: string; catalogo?: string }
   | { tipo: "catalogo"; id: string }
   | { tipo: "erro"; motivo: string };
 
@@ -38,12 +38,16 @@ export function lerIdMercadoLivre(entrada: string): IdMercadoLivre {
 
   const completo = decodeURIComponent(url.pathname + url.search + url.hash);
 
-  // 1) anúncio escolhido dentro de uma página de catálogo
+  const catalogo = url.pathname.match(/\/p\/(MLB\d{6,})/i);
+
+  // 1) anúncio escolhido dentro de uma página de catálogo (guardamos os dois códigos)
   const anuncioEscolhido = completo.match(/(?:item_id[:=]|wid=)(MLB-?\d{6,})/i);
-  if (anuncioEscolhido) return { tipo: "anuncio", id: normalizar(anuncioEscolhido[1]) };
+  if (anuncioEscolhido) {
+    const id = normalizar(anuncioEscolhido[1]);
+    return catalogo ? { tipo: "anuncio", id, catalogo: normalizar(catalogo[1]) } : { tipo: "anuncio", id };
+  }
 
   // 2) página de catálogo: /p/MLB12345678
-  const catalogo = url.pathname.match(/\/p\/(MLB\d{6,})/i);
   if (catalogo) return { tipo: "catalogo", id: normalizar(catalogo[1]) };
 
   // 3) página de anúncio: /MLB-1234567890-...
