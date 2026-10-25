@@ -5,6 +5,7 @@ import { redirect, notFound } from "next/navigation";
 import { comBanco, variavelDoBanco } from "@/lib/db/conexao";
 import { aplicarPendentes, listarMigracoes, type Migracao } from "@/lib/db/migracoes";
 import { provaHabilitada } from "@/lib/ml/prova";
+import { exigirDono } from "@/lib/painel";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Prova · Banco", robots: { index: false, follow: false } };
@@ -14,6 +15,7 @@ type Props = { searchParams: Promise<{ ok?: string; erro?: string }> };
 async function aplicar() {
   "use server";
   if (!provaHabilitada()) notFound();
+  await exigirDono(); // ações de servidor podem ser chamadas direto: conferimos o login aqui também
   let destino: string;
   try {
     const feitas = await comBanco(aplicarPendentes);

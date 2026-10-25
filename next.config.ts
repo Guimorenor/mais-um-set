@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
   // Os arquivos de migração (db/*.sql) precisam ir junto para o servidor da página de prova do banco
   outputFileTracingIncludes: {
     "/admin/prova-banco": ["./db/**/*.sql"],
+    "/admin/(protegido)/prova-banco": ["./db/**/*.sql"],
   },
 };
 
