@@ -17,6 +17,7 @@ export type Ficha = {
   loja: "mercado-livre";
   idProdutoLoja: string; // MLB… — a "digital" contra duplicados
   urlOriginal: string;
+  idCatalogo?: string | null; // produto de catálogo (/p/MLB…): é por ele que a API traz o preço
   linkAfiliado: string | null; // colado à mão; o sistema nunca troca
   tituloLoja: string | null;
   tituloCurto: string | null; // editável por você

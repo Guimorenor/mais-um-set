@@ -3,11 +3,15 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth, DONO_GITHUB_ID } from "@/auth";
 import { AUTORIZACAO, COOKIE_ESTADO, provaHabilitada, urlDeRetorno } from "@/lib/ml/prova";
+import { painelHabilitado } from "@/lib/painel";
+
+const COOKIE_DESTINO = "ml_destino";
 
 export async function GET(req: NextRequest) {
-  if (!provaHabilitada()) return new NextResponse("Não encontrado", { status: 404 });
+  const paraPainel = req.nextUrl.searchParams.get("para") === "painel";
+  if (paraPainel ? !painelHabilitado() : !provaHabilitada()) return new NextResponse("Não encontrado", { status: 404 });
   // Se o login do painel estiver configurado, só o dono pode conectar a conta do ML
-  if (process.env.AUTH_SECRET) {
+  if (process.env.AUTH_SECRET || paraPainel) {
     const sessao = await auth();
     if (sessao?.user?.githubId !== DONO_GITHUB_ID) return NextResponse.redirect(new URL("/admin/entrar", req.url));
   }
@@ -23,5 +27,6 @@ export async function GET(req: NextRequest) {
 
   const res = NextResponse.redirect(destino);
   res.cookies.set(COOKIE_ESTADO, estado, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 600, path: "/" });
+  res.cookies.set(COOKIE_DESTINO, paraPainel ? "painel" : "prova", { httpOnly: true, secure: true, sameSite: "lax", maxAge: 600, path: "/" });
   return res;
 }
