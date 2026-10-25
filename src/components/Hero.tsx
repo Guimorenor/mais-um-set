@@ -199,14 +199,25 @@ function AchadoDaVez({ o }: { o: Oferta | null }) {
     >
       <img src="/home/hero-quadra.webp" alt="" className="pointer-events-none absolute inset-0 size-full object-cover transition-transform duration-[1200ms] ease-suave group-hover/achado:scale-[1.03]" />
 
-      {/* foto do produto (vem da loja: fica numa moldura clara arredondada) */}
-      <div className="pointer-events-none absolute top-[42px] right-3 size-[150px] overflow-hidden rounded-3xl bg-white p-2 sm:size-[180px] md:relative md:top-auto md:right-auto md:order-last md:size-[300px] md:shrink-0 md:rounded-[32px] lg:absolute lg:top-1/2 lg:right-[60px] lg:h-auto lg:w-[min(400px,calc(100%-620px))] lg:aspect-square lg:-translate-y-1/2 lg:rounded-[40px]">
-        <img
-          src={o.imagem}
-          alt=""
-          className="size-full object-contain transition-transform duration-700 ease-suave group-hover/achado:-translate-y-1 group-hover/achado:scale-105"
-        />
-      </div>
+      {o.imagemRecorte ? (
+        /* foto SEM fundo (recorte aprovado no painel): solta sobre a quadra, como no Figma */
+        <div className="pointer-events-none absolute top-[36px] right-2 h-[200px] w-[150px] sm:h-[230px] sm:w-[190px] md:relative md:top-auto md:right-auto md:order-last md:h-[340px] md:w-[300px] md:shrink-0 lg:absolute lg:top-8 lg:right-10 lg:h-[494px] lg:w-[min(420px,calc(100%-600px))]">
+          <img
+            src={o.imagemRecorte}
+            alt=""
+            className="size-full object-contain drop-shadow-[0_24px_32px_rgba(0,0,0,0.45)] transition-transform duration-700 ease-suave group-hover/achado:-translate-y-2 group-hover/achado:rotate-3"
+          />
+        </div>
+      ) : (
+        /* foto original da loja: numa moldura clara arredondada */
+        <div className="pointer-events-none absolute top-[42px] right-3 size-[150px] overflow-hidden rounded-3xl bg-white p-2 sm:size-[180px] md:relative md:top-auto md:right-auto md:order-last md:size-[300px] md:shrink-0 md:rounded-[32px] lg:absolute lg:top-1/2 lg:right-[60px] lg:h-auto lg:w-[min(400px,calc(100%-620px))] lg:aspect-square lg:-translate-y-1/2 lg:rounded-[40px]">
+          <img
+            src={o.imagem}
+            alt=""
+            className="size-full object-contain transition-transform duration-700 ease-suave group-hover/achado:-translate-y-1 group-hover/achado:scale-105"
+          />
+        </div>
+      )}
 
       <div className="relative flex flex-col gap-3 md:min-w-0 md:flex-1 md:gap-4 lg:absolute lg:top-1/2 lg:left-[60px] lg:w-[500px] lg:-translate-y-1/2 lg:gap-8">
         <div className="flex flex-col gap-3 lg:gap-2">

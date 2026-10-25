@@ -1,0 +1,6 @@
+rembg[cpu]==2.0.86
+pillow==12.3.0
+numpy==2.5.3
+scipy==1.18.1
+psycopg[binary]==3.2.13
+requests==2.32.5

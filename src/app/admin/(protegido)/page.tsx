@@ -7,6 +7,31 @@ import { listarMigracoes } from "@/lib/db/migracoes";
 import { listarFichas } from "@/lib/fichas/repositorio";
 import { ESTADOS, precoVelho, type Estado } from "@/lib/fichas/regras";
 import { estadoConexaoML } from "@/lib/ml/servidor";
+import { ligarAutomacao, lerAutomacoes, type NomeAutomacao } from "@/lib/automacoes";
+import { exigirDono } from "@/lib/painel";
+import { revalidateTag } from "next/cache";
+import { redirect } from "next/navigation";
+
+async function alternar(form: FormData) {
+  "use server";
+  await exigirDono();
+  const nome = String(form.get("nome")) as NomeAutomacao;
+  if (nome !== "recorte" && nome !== "destaque_automatico") return;
+  await ligarAutomacao(nome, form.get("ativa") === "1");
+  revalidateTag("vitrine");
+  redirect("/admin");
+}
+
+const SOBRE: Record<NomeAutomacao, { titulo: string; texto: string }> = {
+  destaque_automatico: {
+    titulo: "Destaque automático",
+    texto: "A oferta publicada com maior desconto confirmado vira o Achado da vez; as 2 seguintes, destaques secundários.",
+  },
+  recorte: {
+    titulo: "Recorte da foto do Achado da vez",
+    texto: "A cada 3 h, recorta o fundo da foto do achado atual (máx. 5 fotos por vez). Você aprova na ficha antes de ir ao site.",
+  },
+};
 import { Aviso, EtiquetaEstado, NOMES_ESTADO, botao, botaoSecundario, caixa, dataHora, preco } from "./_ui";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +60,7 @@ export default async function Painel({ searchParams }: Props) {
     );
   }
 
-  const [fichas, ml] = await Promise.all([listarFichas(), estadoConexaoML()]);
+  const [fichas, ml, automacoes] = await Promise.all([listarFichas(), estadoConexaoML(), lerAutomacoes()]);
   const contagem = Object.fromEntries(ESTADOS.map((e) => [e, fichas.filter((f) => f.estado === e).length])) as Record<Estado, number>;
   const visiveis = fichas.filter((f) =>
     filtro === "todas" ? true : filtro === "fila" ? f.estado === "rascunho" || f.estado === "em_revisao" : f.estado === filtro,
@@ -70,6 +95,32 @@ export default async function Painel({ searchParams }: Props) {
           {ml.conectado ? "Reconectar" : "Conectar Mercado Livre"}
         </a>
       </section>
+
+      {automacoes.length > 0 && (
+        <section className={`mt-4 ${caixa} flex flex-col gap-3 py-4`}>
+          <h2 className="text-400 font-semibold text-text-brand">Automações</h2>
+          {automacoes.map((a) => (
+            <div key={a.nome} className="flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-3">
+              <div className="min-w-0 flex-1 text-200">
+                <p className="text-300 font-semibold">
+                  {a.ativa ? "🟢" : "⏸️"} {SOBRE[a.nome]?.titulo ?? a.nome}
+                </p>
+                <p className="text-text-subtle">{SOBRE[a.nome]?.texto}</p>
+                {a.nome === "recorte" && (
+                  <p className="text-text-subtlest">
+                    Última execução: {a.ultimaExecucao ? `${dataHora(a.ultimaExecucao)} · ${a.ultimoResultado ?? ""}` : "ainda não rodou"}
+                  </p>
+                )}
+              </div>
+              <form action={alternar}>
+                <input type="hidden" name="nome" value={a.nome} />
+                <input type="hidden" name="ativa" value={a.ativa ? "0" : "1"} />
+                <button className={botaoSecundario}>{a.ativa ? "Pausar" : "Ligar"}</button>
+              </form>
+            </div>
+          ))}
+        </section>
+      )}
 
       <nav className="mt-6 flex flex-wrap gap-2" aria-label="Filtrar por estado">
         {FILTROS.map((f) => (

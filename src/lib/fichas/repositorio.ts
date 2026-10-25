@@ -40,6 +40,9 @@ function paraFicha(r: Linha): Ficha {
     criadoEm: r.criado_em as Date,
     atualizadoEm: r.atualizado_em as Date,
     publicadoEm: (r.publicado_em as Date) ?? null,
+    recorteStatus: (r.recorte_status as Ficha["recorteStatus"]) ?? null,
+    recorteErro: (r.recorte_erro as string) ?? null,
+    usarRecorte: Boolean(r.usar_recorte),
   };
 }
 
@@ -146,6 +149,13 @@ export async function editarFicha(id: string, e: Edicao) {
     if (e.verificadoAgora) sets.push("verificado_em = now()", "fonte = 'Conferido à mão no painel'", "moeda = 'BRL'");
     if (!sets.length) return;
     vals.push(id);
+    // Foto trocada: o recorte antigo deixa de valer (o estagiário recorta a nova se for o achado)
+    if ("imagem" in e) {
+      await pool.query(
+        "UPDATE fichas SET recorte_status = NULL, usar_recorte = false WHERE id = $1 AND imagem IS DISTINCT FROM $2",
+        [id, e.imagem ?? null],
+      );
+    }
     // Só pode haver UM "achado da vez": quem recebe tira o de quem tinha
     if (e.destaque === "achado_da_vez") {
       await pool.query("UPDATE fichas SET destaque = 'nenhum' WHERE destaque = 'achado_da_vez' AND id <> $1", [id]);
@@ -207,4 +217,24 @@ async function diario(
     "INSERT INTO verificacoes (ficha_id, autor, resultado, mudancas, erro, estado_de, estado_para) VALUES ($1,$2,$3,$4,$5,$6,$7)",
     [fichaId, autor, resultado, m, erro, de, para],
   );
+}
+
+// ── Recorte da foto (só para o "Achado da vez") ──────────────────────────────
+
+/** Você aprova (usar) ou recusa o recorte pronto. */
+export async function decidirRecorte(id: string, usar: boolean) {
+  await comBanco(async (pool) => {
+    await pool.query("UPDATE fichas SET usar_recorte = $1 WHERE id = $2 AND recorte_status = 'pronto'", [usar, id]);
+    await diario(pool, id, "moreno", "ok", [usar ? "recorte aprovado: o Achado da vez usa a foto sem fundo" : "recorte recusado: fica a foto original"], null, null, null);
+  });
+  atualizarVitrine();
+}
+
+/** Pede ao estagiário para recortar (ou refazer) esta foto na próxima execução. */
+export async function pedirRecorte(id: string) {
+  await comBanco(async (pool) => {
+    await pool.query("UPDATE fichas SET recorte_status = 'pendente', recorte_erro = NULL, usar_recorte = false WHERE id = $1", [id]);
+    await diario(pool, id, "moreno", "ok", ["recorte pedido: entra na próxima execução"], null, null, null);
+  });
+  atualizarVitrine();
 }

@@ -9,6 +9,7 @@ export type Oferta = {
   categoria: CategoriaSlug;
   loja: string;
   imagem: string;
+  imagemRecorte?: string; // foto sem fundo (PNG), quando você aprovou o recorte
   precoDe: number | null; // só quando a loja informou o preço anterior
   precoPor: number;
   link: string; // link de afiliado (meli.la)

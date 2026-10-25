@@ -38,6 +38,10 @@ export type Ficha = {
   criadoEm: Date;
   atualizadoEm: Date;
   publicadoEm: Date | null;
+  // Recorte da foto (só usado no "Achado da vez")
+  recorteStatus?: "pendente" | "pronto" | "erro" | null;
+  recorteErro?: string | null;
+  usarRecorte?: boolean;
 };
 
 /** Depois de quanto tempo sem verificação o preço é considerado velho (decisão: 36 h). */

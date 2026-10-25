@@ -6,7 +6,8 @@ import { notFound, redirect } from "next/navigation";
 import { categorias } from "@/lib/categorias";
 import { lerCategoria, lerImagem, lerPreco, textoOuNull } from "@/lib/fichas/formulario";
 import { descontoConfiavel, linkAfiliadoValido, pendenciasParaPublicar, podeMudarEstado, ESTADOS, type Destaque, type Estado } from "@/lib/fichas/regras";
-import { buscarFicha, editarFicha, mudarEstado, registrarVerificacao, type Edicao } from "@/lib/fichas/repositorio";
+import { buscarFicha, decidirRecorte, editarFicha, mudarEstado, pedirRecorte, registrarVerificacao, type Edicao } from "@/lib/fichas/repositorio";
+import { lerAutomacoes } from "@/lib/automacoes";
 import { precoAnteriorValido } from "@/lib/ml/catalogo";
 import { lerCatalogo } from "@/lib/ml/servidor";
 import { exigirDono } from "@/lib/painel";
@@ -29,14 +30,17 @@ async function salvar(form: FormData) {
   const link = textoOuNull(form.get("link_afiliado"), 500);
   if (link && !linkAfiliadoValido(link)) voltar(id, "erro", "O link de afiliado precisa ser um meli.la (ou mercadolivre.com/sec/…).");
 
-  const destaque = String(form.get("destaque") ?? "nenhum") as Destaque;
   const e: Edicao = {
     linkAfiliado: link,
     tituloCurto: textoOuNull(form.get("titulo_curto"), 120),
     categoria: lerCategoria(form.get("categoria")),
     observacao: textoOuNull(form.get("observacao"), 200),
-    destaque: atual.ficha.estado === "publicada" && ["nenhum", "achado_da_vez", "secundario"].includes(destaque) ? destaque : "nenhum",
   };
+  // o campo de destaque só existe no formulário quando o destaque automático está desligado
+  if (form.has("destaque")) {
+    const destaque = String(form.get("destaque")) as Destaque;
+    e.destaque = atual.ficha.estado === "publicada" && ["nenhum", "achado_da_vez", "secundario"].includes(destaque) ? destaque : "nenhum";
+  }
   // Ficha sem catálogo: dados da loja são à mão
   if (!atual.ficha.idCatalogo) {
     e.tituloLoja = textoOuNull(form.get("titulo_loja"));
@@ -92,6 +96,17 @@ async function mudar(form: FormData) {
   else voltar(id, "erro", r.motivo);
 }
 
+async function recorte(form: FormData) {
+  "use server";
+  await exigirDono();
+  const id = String(form.get("id"));
+  const acao = String(form.get("acao"));
+  if (acao === "usar") await decidirRecorte(id, true);
+  else if (acao === "recusar") await decidirRecorte(id, false);
+  else await pedirRecorte(id);
+  voltar(id, "ok", acao === "usar" ? "Recorte aprovado." : acao === "recusar" ? "Recorte recusado: fica a foto original." : "Recorte pedido: entra na próxima execução (até 3 h).");
+}
+
 const ROTULO_ACAO: Partial<Record<Estado, string>> = {
   em_revisao: "Enviar para revisão",
   publicada: "Aprovar e publicar",
@@ -108,6 +123,9 @@ export default async function FichaPage({ params, searchParams }: Props) {
   const dados = await buscarFicha(id);
   if (!dados) notFound();
   const { ficha: f, diario } = dados;
+  const automacoes = await lerAutomacoes().catch(() => []);
+  const destaqueAuto = automacoes.find((a) => a.nome === "destaque_automatico")?.ativa ?? false;
+  const temColunasRecorte = automacoes.length > 0;
   const pct = descontoConfiavel(f);
   const falta = pendenciasParaPublicar(f);
   const acoes = ESTADOS.filter((e) => e !== f.estado && ROTULO_ACAO[e]).filter((e) => {
@@ -189,6 +207,46 @@ export default async function FichaPage({ params, searchParams }: Props) {
         )}
       </section>
 
+      {/* Recorte da foto (só para o Achado da vez) */}
+      {temColunasRecorte && f.imagem && (
+        <section className={`mt-6 ${caixa} flex flex-col gap-4`}>
+          <h2 className="text-500 font-semibold text-text-brand">Foto sem fundo (Achado da vez)</h2>
+          <p className="text-200 text-text-subtle">
+            O recorte só é usado quando esta oferta é o Achado da vez. O estagiário recorta sozinho a foto do achado atual
+            (a cada 3 h); você aprova antes de ir para o site.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <figure className="flex flex-col gap-1 text-200">
+              <img src={f.imagem} alt="" className="size-40 rounded-2xl bg-white object-contain" />
+              <figcaption className="text-text-subtle">Original</figcaption>
+            </figure>
+            {f.recorteStatus === "pronto" && (
+              <figure className="flex flex-col gap-1 text-200">
+                <img
+                  src={`/api/recorte/${f.id}?previa=1&t=${f.atualizadoEm.getTime()}`}
+                  alt=""
+                  className="size-40 rounded-2xl bg-[repeating-conic-gradient(#ccc_0_25%,#fff_0_50%)] bg-[length:16px_16px] object-contain"
+                />
+                <figcaption className="text-text-subtle">Recorte {f.usarRecorte ? "· ✅ aprovado" : "· aguardando você"}</figcaption>
+              </figure>
+            )}
+          </div>
+          <p className="text-300">
+            {f.recorteStatus === "pendente" && "⏳ Na fila: entra na próxima execução do estagiário."}
+            {f.recorteStatus === "erro" && `❌ Não deu para recortar: ${f.recorteErro ?? "erro desconhecido"}`}
+            {!f.recorteStatus && "Ainda sem recorte."}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {f.recorteStatus === "pronto" && !f.usarRecorte && <BotaoRecorte id={f.id} acao="usar" rotulo="Usar recorte" principal />}
+            {f.recorteStatus === "pronto" && f.usarRecorte && <BotaoRecorte id={f.id} acao="recusar" rotulo="Voltar para a foto original" />}
+            {f.recorteStatus === "pronto" && !f.usarRecorte && <BotaoRecorte id={f.id} acao="recusar" rotulo="Não usar" />}
+            {f.recorteStatus !== "pendente" && (
+              <BotaoRecorte id={f.id} acao="pedir" rotulo={f.recorteStatus ? "Refazer recorte" : "Pedir recorte"} />
+            )}
+          </div>
+        </section>
+      )}
+
       {/* Edição */}
       <form action={salvar} className={`mt-6 ${caixa} flex flex-col gap-4`}>
         <input type="hidden" name="id" value={f.id} />
@@ -203,7 +261,13 @@ export default async function FichaPage({ params, searchParams }: Props) {
           </select>
         </label>
         <Campo rotulo="Observação" nome="observacao" valor={f.observacao} />
-        {f.estado === "publicada" && (
+        {f.estado === "publicada" && destaqueAuto && (
+          <p className="text-200 text-text-subtle">
+            Destaque do topo: <strong>automático</strong> (maior desconto confirmado vira o Achado da vez). Para escolher à mão,
+            desligue em <Link className="underline" href="/admin">Automações</Link>.
+          </p>
+        )}
+        {f.estado === "publicada" && !destaqueAuto && (
           <label className="flex flex-col gap-1 text-300">
             <span className="font-semibold">Destaque no topo do site</span>
             <select name="destaque" className={campo} defaultValue={f.destaque}>
@@ -238,10 +302,10 @@ export default async function FichaPage({ params, searchParams }: Props) {
             <li key={i} className="border-t border-border-default pt-2">
               <span className="text-text-subtle">{dataHora(d.quando)} · {d.autor === "moreno" ? "você" : "automação"} · </span>
               {d.resultado === "estado" && <>estado: {d.estadoDe ? NOMES_ESTADO[d.estadoDe] : "—"} → {d.estadoPara ? NOMES_ESTADO[d.estadoPara] : "—"}</>}
-              {d.resultado === "ok" && <>verificado, nada mudou</>}
+              {d.resultado === "ok" && d.mudancas.length === 0 && <>verificado, nada mudou</>}
               {d.resultado === "mudou" && <>verificado</>}
               {d.resultado === "erro" && <>❌ {d.erro}</>}
-              {d.mudancas.length > 0 && <> · {d.mudancas.join(" · ")}</>}
+              {d.mudancas.length > 0 && <>{d.resultado === "ok" ? "" : " · "}{d.mudancas.join(" · ")}</>}
             </li>
           ))}
         </ul>
@@ -256,5 +320,15 @@ function Campo(p: { rotulo: string; nome: string; valor?: string | null; placeho
       <span className="font-semibold">{p.rotulo}</span>
       <input name={p.nome} defaultValue={p.valor ?? ""} placeholder={p.placeholder} className={campo} />
     </label>
+  );
+}
+
+function BotaoRecorte({ id, acao, rotulo, principal }: { id: string; acao: string; rotulo: string; principal?: boolean }) {
+  return (
+    <form action={recorte}>
+      <input type="hidden" name="id" value={id} />
+      <input type="hidden" name="acao" value={acao} />
+      <button className={principal ? botao : botaoSecundario}>{rotulo}</button>
+    </form>
   );
 }
