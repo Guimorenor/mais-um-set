@@ -5,7 +5,10 @@ import "server-only";
 import { Pool, neonConfig } from "@neondatabase/serverless";
 import ws from "ws";
 
-neonConfig.webSocketConstructor = ws;
+// O Node 22 já tem WebSocket próprio; o pacote "ws" fica só de reserva.
+// (Empacotado pelo Next, o "ws" pode quebrar e derrubar a conexão — por isso
+// ele também fica fora do pacote, em next.config.ts.)
+neonConfig.webSocketConstructor = (globalThis.WebSocket as unknown as typeof ws | undefined) ?? ws;
 
 /** Nome da variável que tem o endereço do banco (a primeira que existir). */
 export function variavelDoBanco(): string | null {

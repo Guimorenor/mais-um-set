@@ -24,6 +24,13 @@ async function aplicar() {
   redirect(destino);
 }
 
+/** Mensagem do erro + a causa por trás (sem mostrar endereço nem senha do banco). */
+function descreverErro(e: unknown): string {
+  if (!(e instanceof Error)) return String(e);
+  const causa = e.cause instanceof Error ? ` · causa: ${e.cause.message}` : "";
+  return `${e.message}${causa}`.replace(/postgres(ql)?:\/\/\S+/gi, "[endereço oculto]");
+}
+
 type Estado = {
   agora: string;
   versao: string;
@@ -58,7 +65,7 @@ export default async function ProvaBanco({ searchParams }: Props) {
         };
       });
     } catch (e) {
-      falha = e instanceof Error ? e.message : String(e);
+      falha = descreverErro(e);
     }
   }
   const pendentes = estado?.migracoes.filter((m) => !m.aplicadaEm).length ?? 0;
