@@ -21,6 +21,14 @@ export default async function Entrar({ searchParams }: Props) {
           {error === "AccessDenied" ? "❌ Essa conta do GitHub não tem acesso ao painel." : `❌ Não deu para entrar (${error}).`}
         </p>
       )}
+      {error === "Configuration" && (
+        <ul className="rounded-2xl bg-surface-subtle p-4 text-200">
+          <li className="font-semibold">Chaves do login no cofre da Vercel (só mostra se existem):</li>
+          {["AUTH_SECRET", "AUTH_GITHUB_ID", "AUTH_GITHUB_SECRET"].map((nome) => (
+            <li key={nome}>{process.env[nome] ? "✅" : "❌"} <code>{nome}</code></li>
+          ))}
+        </ul>
+      )}
       <form
         action={async () => {
           "use server";
