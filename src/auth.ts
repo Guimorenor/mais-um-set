@@ -2,6 +2,8 @@
 // As chaves (AUTH_GITHUB_ID, AUTH_GITHUB_SECRET, AUTH_SECRET) ficam no cofre da Vercel.
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
+import { waitUntil } from "@vercel/functions";
+import { gravarErroLogin } from "@/lib/errosLogin";
 
 // Número da conta Guimorenor no GitHub. Usamos o número (e não o nome),
 // porque o nome de usuário pode ser trocado e o número nunca muda.
@@ -9,6 +11,13 @@ export const DONO_GITHUB_ID = "345960580";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [GitHub],
+  // Erros do login vão para o banco (a tela "Entrar" mostra o motivo)
+  logger: {
+    error(erro) {
+      console.error("[auth][error]", erro);
+      waitUntil(gravarErroLogin(erro));
+    },
+  },
   pages: { signIn: "/admin/entrar", error: "/admin/entrar" },
   session: { strategy: "jwt", maxAge: 60 * 60 * 12 }, // login vale 12 h
   callbacks: {

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { signIn } from "@/auth";
 import { painelHabilitado } from "@/lib/painel";
+import { ultimosErrosLogin } from "@/lib/errosLogin";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Entrar · Painel", robots: { index: false, follow: false } };
@@ -12,6 +13,7 @@ type Props = { searchParams: Promise<{ error?: string }> };
 export default async function Entrar({ searchParams }: Props) {
   if (!painelHabilitado()) notFound();
   const { error } = await searchParams;
+  const erros = error ? await ultimosErrosLogin() : [];
   return (
     <main className="mx-auto flex max-w-md flex-col gap-4 px-4 py-16 text-text-default">
       <p className="text-200 font-semibold text-text-subtlest uppercase">Painel · só em preview</p>
@@ -28,6 +30,18 @@ export default async function Entrar({ searchParams }: Props) {
             <li key={nome}>{process.env[nome] ? "✅" : "❌"} <code>{nome}</code></li>
           ))}
         </ul>
+      )}
+      {erros.length > 0 && (
+        <div className="rounded-2xl bg-surface-subtle p-4 text-200">
+          <p className="font-semibold">Motivo registrado (mais recente primeiro):</p>
+          <ul className="mt-1 space-y-2">
+            {erros.map((e, i) => (
+              <li key={i} className="break-all">
+                <span className="text-text-subtle">{e.quando.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</span> · {e.texto}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
       <form
         action={async () => {
