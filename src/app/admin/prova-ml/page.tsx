@@ -30,6 +30,31 @@ const CAMPOS: { chave: string; rotulo: string; uso: string }[] = [
   { chave: "last_updated", rotulo: "Última atualização no ML", uso: "saber se mudou" },
 ];
 
+type Obj = Record<string, unknown>;
+const vencedorDe = (p: Obj) => (p.buy_box_winner ?? {}) as Obj;
+const CAMPOS_CATALOGO: [string, (p: Obj) => unknown][] = [
+  ["Nome do produto", (p) => p.name],
+  ["Status", (p) => p.status],
+  ["Fotos", (p) => p.pictures],
+  ["Preço do vencedor", (p) => vencedorDe(p).price],
+  ["Preço anterior do vencedor", (p) => vencedorDe(p).original_price],
+  ["Anúncio vencedor", (p) => vencedorDe(p).item_id],
+  ["Vendedor do vencedor", (p) => vencedorDe(p).seller_id],
+  ["Link do produto", (p) => p.permalink],
+];
+
+const CAMPOS_OFERTA: [string, (o: Obj) => unknown][] = [
+  ["Anúncio", (o) => o.item_id],
+  ["Preço", (o) => o.price],
+  ["Preço anterior", (o) => o.original_price],
+  ["Moeda", (o) => o.currency_id],
+  ["Vendedor", (o) => o.seller_id],
+  ["Loja oficial", (o) => o.official_store_id],
+  ["Condição", (o) => o.condition],
+  ["Frete grátis", (o) => (o.shipping as Obj | undefined)?.free_shipping],
+  ["Estoque", (o) => o.available_quantity],
+];
+
 function resumo(valor: unknown): string {
   if (valor === undefined || valor === null || valor === "") return "";
   if (Array.isArray(valor)) {
@@ -47,8 +72,10 @@ function itemDoMultiget(r: Resposta): Record<string, unknown> | null {
 }
 
 function Linha({ nome, r }: { nome: string; r: Resposta }) {
-  const multi = Array.isArray(r.corpo) ? (r.corpo[0] as { code?: number } | undefined)?.code : undefined;
-  const msg = (r.corpo as { message?: string } | null)?.message;
+  const primeiro = Array.isArray(r.corpo) ? (r.corpo[0] as { code?: number; body?: { message?: string; error?: string } } | undefined) : undefined;
+  const multi = primeiro?.code;
+  // mensagem do ML: no topo da resposta ou dentro do item (multiget)
+  const msg = (r.corpo as { message?: string } | null)?.message ?? primeiro?.body?.message ?? primeiro?.body?.error;
   return (
     <tr className="border-t border-border-default">
       <td className="py-2 pr-4">{nome}</td>
@@ -68,23 +95,37 @@ export default async function ProvaMercadoLivre({ searchParams }: Props) {
   const id = url ? lerIdMercadoLivre(url) : null;
   const verificadoEm = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
-  let testes: { nome: string; r: Resposta }[] = [];
+  const testes: { nome: string; r: Resposta }[] = [];
   let item: Record<string, unknown> | null = null;
+  let produto: Record<string, unknown> | null = null;
+  let ofertasCatalogo: Obj[] = [];
   if (token && id && id.tipo !== "erro") {
     const busca = await consultar("/sites/MLB/search?q=raquete%20head&limit=1", token);
+    const conta = await consultar("/users/me", token);
+    testes.push({ nome: "Crachá funciona? (/users/me)", r: conta });
     if (id.tipo === "anuncio") {
       const semToken = await consultar(`/items?ids=${id.id}`);
       const comToken = await consultar(`/items?ids=${id.id}`, token);
-      item = itemDoMultiget(comToken);
-      testes = [
+      const unico = await consultar(`/items/${id.id}`, token);
+      item = itemDoMultiget(comToken) ?? (unico.ok ? (unico.corpo as Record<string, unknown>) : null);
+      testes.push(
         { nome: `Dados do anúncio SEM login (/items?ids=${id.id})`, r: semToken },
         { nome: `Dados do anúncio COM login (/items?ids=${id.id})`, r: comToken },
-      ];
-    } else {
-      const produto = await consultar(`/products/${id.id}`, token);
-      const vencedor = (produto.corpo as { buy_box_winner?: { item_id?: string } } | null)?.buy_box_winner?.item_id;
-      testes = [{ nome: `Produto de catálogo COM login (/products/${id.id})`, r: produto }];
-      if (vencedor) {
+        { nome: `Dados do anúncio, outro caminho (/items/${id.id})`, r: unico },
+      );
+    }
+    const codigoCatalogo = id.tipo === "catalogo" ? id.id : id.catalogo;
+    if (codigoCatalogo) {
+      const produtoR = await consultar(`/products/${codigoCatalogo}`, token);
+      const ofertas = await consultar(`/products/${codigoCatalogo}/items`, token);
+      testes.push(
+        { nome: `Produto de catálogo (/products/${codigoCatalogo})`, r: produtoR },
+        { nome: `Ofertas do catálogo (/products/${codigoCatalogo}/items)`, r: ofertas },
+      );
+      if (produtoR.ok) produto = produtoR.corpo as Record<string, unknown>;
+      if (ofertas.ok) ofertasCatalogo = ((ofertas.corpo as { results?: Obj[] } | null)?.results ?? []).slice(0, 5);
+      const vencedor = (produto?.buy_box_winner as { item_id?: string } | undefined)?.item_id;
+      if (vencedor && !item) {
         const comToken = await consultar(`/items?ids=${vencedor}`, token);
         item = itemDoMultiget(comToken);
         testes.push({ nome: `Anúncio vencedor do catálogo (/items?ids=${vencedor})`, r: comToken });
@@ -172,6 +213,53 @@ export default async function ProvaMercadoLivre({ searchParams }: Props) {
             </table>
           ) : (
             <p className="mt-2 text-300">Nenhum dado de anúncio retornado — veja os códigos HTTP acima.</p>
+          )}
+
+          {ofertasCatalogo.length > 0 && (
+            <>
+              <h3 className="mt-6 text-400 font-semibold text-text-brand">Ofertas do catálogo (até 5 vendedores)</h3>
+              <p className="mt-1 text-200 text-text-subtle">
+                Campos que vieram: <code className="break-all">{Object.keys(ofertasCatalogo[0]).join(", ")}</code>
+              </p>
+              <div className="mt-2 overflow-x-auto">
+                <table className="w-full text-left text-200">
+                  <thead>
+                    <tr className="text-text-subtlest">
+                      {CAMPOS_OFERTA.map(([rotulo]) => <th key={rotulo} className="py-2 pr-3">{rotulo}</th>)}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {ofertasCatalogo.map((o, i) => (
+                      <tr key={i} className="border-t border-border-default align-top">
+                        {CAMPOS_OFERTA.map(([rotulo, valor]) => (
+                          <td key={rotulo} className="py-2 pr-3 break-all">{resumo(valor(o)) || "—"}</td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
+
+          {produto && (
+            <>
+              <h3 className="mt-6 text-400 font-semibold text-text-brand">Campos que a API devolveu para o produto de catálogo</h3>
+              <table className="mt-2 w-full text-left text-200">
+                <tbody>
+                  {CAMPOS_CATALOGO.map(([rotulo, valor]) => {
+                    const v = resumo(valor(produto!));
+                    return (
+                      <tr key={rotulo} className="border-t border-border-default align-top">
+                        <td className="py-2 pr-3">{rotulo}</td>
+                        <td className="py-2 pr-3">{v ? "✅" : "—"}</td>
+                        <td className="py-2 break-all">{v || "não veio"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </>
           )}
         </section>
       )}

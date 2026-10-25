@@ -20,11 +20,11 @@ test("página de catálogo", () => {
 test("catálogo com anúncio escolhido na URL", () => {
   assert.deepEqual(
     lerIdMercadoLivre("https://www.mercadolivre.com.br/raquete/p/MLB41234567?pdp_filters=item_id:MLB4999999999"),
-    { tipo: "anuncio", id: "MLB4999999999" },
+    { tipo: "anuncio", id: "MLB4999999999", catalogo: "MLB41234567" },
   );
   assert.deepEqual(
     lerIdMercadoLivre("https://www.mercadolivre.com.br/raquete/p/MLB41234567#wid=MLB4888888888&sid=search"),
-    { tipo: "anuncio", id: "MLB4888888888" },
+    { tipo: "anuncio", id: "MLB4888888888", catalogo: "MLB41234567" },
   );
 });
 
