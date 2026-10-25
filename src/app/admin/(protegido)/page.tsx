@@ -16,7 +16,7 @@ async function alternar(form: FormData) {
   "use server";
   await exigirDono();
   const nome = String(form.get("nome")) as NomeAutomacao;
-  if (nome !== "recorte" && nome !== "destaque_automatico") return;
+  if (!(nome in SOBRE)) return;
   await ligarAutomacao(nome, form.get("ativa") === "1");
   revalidateTag("vitrine");
   redirect("/admin");
@@ -27,9 +27,13 @@ const SOBRE: Record<NomeAutomacao, { titulo: string; texto: string }> = {
     titulo: "Destaque automático",
     texto: "A oferta publicada com maior desconto confirmado vira o Achado da vez; as 2 seguintes, destaques secundários.",
   },
+  recorte_aprovacao_automatica: {
+    titulo: "Aprovar o recorte sozinho",
+    texto: "O recorte pronto já vai para o site. Se não gostar de algum, volte para a foto original na ficha.",
+  },
   recorte: {
     titulo: "Recorte das fotos dos destaques",
-    texto: "A cada 3 h, recorta o fundo das fotos dos 3 destaques do topo (máx. 5 por vez). Você aprova na ficha antes de ir ao site.",
+    texto: "A cada 3 h, recorta o fundo das fotos dos 3 destaques do topo (máx. 5 por vez).",
   },
 };
 import { Aviso, EtiquetaEstado, NOMES_ESTADO, botao, botaoSecundario, caixa, dataHora, preco } from "./_ui";

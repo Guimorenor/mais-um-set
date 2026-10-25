@@ -24,6 +24,8 @@ export async function GET(req: NextRequest) {
   destino.searchParams.set("client_id", clientId);
   destino.searchParams.set("redirect_uri", urlDeRetorno(req.nextUrl.origin));
   destino.searchParams.set("state", estado);
+  // Pede renovação automática (refresh token). Se o app não tiver esse acesso, o ML ignora.
+  if (paraPainel) destino.searchParams.set("scope", "offline_access read");
 
   const res = NextResponse.redirect(destino);
   res.cookies.set(COOKIE_ESTADO, estado, { httpOnly: true, secure: true, sameSite: "lax", maxAge: 600, path: "/" });

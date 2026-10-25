@@ -7,7 +7,8 @@ Regras (combinadas com o Moreno):
     estiver desligado) e as fotos que você pedir no painel ("Pedir recorte");
   - no máximo LIMITE imagens por execução (padrão 5);
   - se a automação "recorte" estiver pausada no painel, não faz nada;
-  - o recorte NUNCA vai para o site sozinho: fica "pronto" esperando você aprovar no painel;
+  - com "aprovação automática" ligada no painel, o recorte pronto já vai para o site
+    (você pode voltar para a foto original na ficha); desligada, espera você aprovar;
   - erros ficam anotados na ficha e no Diário, e a ficha não é tocada de novo até você pedir.
 """
 
@@ -126,6 +127,9 @@ def main() -> int:
             con.execute("UPDATE automacoes SET ultima_execucao = now(), ultimo_resultado = 'nada a fazer' WHERE nome = 'recorte'")
             return 0
 
+        aprova = con.execute("SELECT ativa FROM automacoes WHERE nome = 'recorte_aprovacao_automatica'").fetchone()
+        aprovar_sozinho = bool(aprova and aprova[0])
+
         from rembg import new_session
 
         sessao = new_session("isnet-general-use")
@@ -142,12 +146,17 @@ def main() -> int:
                         (ficha_id, png, imagem, w, h),
                     )
                     con.execute(
-                        "UPDATE fichas SET recorte_status = 'pronto', recorte_erro = NULL, usar_recorte = false WHERE id = %s",
-                        (ficha_id,),
+                        "UPDATE fichas SET recorte_status = 'pronto', recorte_erro = NULL, usar_recorte = %s WHERE id = %s",
+                        (aprovar_sozinho, ficha_id),
                     )
                     con.execute(
                         "INSERT INTO verificacoes (ficha_id, autor, resultado, mudancas) VALUES (%s, 'automacao', 'ok', %s)",
-                        (ficha_id, ["recorte da foto pronto: aguardando sua aprovação"]),
+                        (
+                            ficha_id,
+                            ["recorte da foto pronto e já em uso no site (aprovação automática)"]
+                            if aprovar_sozinho
+                            else ["recorte da foto pronto: aguardando sua aprovação"],
+                        ),
                     )
                 ok += 1
                 print(f"  ✓ {ficha_id} ({w}x{h}, {time.time() - inicio:.1f} s)")
