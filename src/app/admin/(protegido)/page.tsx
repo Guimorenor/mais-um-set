@@ -28,8 +28,8 @@ const SOBRE: Record<NomeAutomacao, { titulo: string; texto: string }> = {
     texto: "A oferta publicada com maior desconto confirmado vira o Achado da vez; as 2 seguintes, destaques secundários.",
   },
   recorte: {
-    titulo: "Recorte da foto do Achado da vez",
-    texto: "A cada 3 h, recorta o fundo da foto do achado atual (máx. 5 fotos por vez). Você aprova na ficha antes de ir ao site.",
+    titulo: "Recorte das fotos dos destaques",
+    texto: "A cada 3 h, recorta o fundo das fotos dos 3 destaques do topo (máx. 5 por vez). Você aprova na ficha antes de ir ao site.",
   },
 };
 import { Aviso, EtiquetaEstado, NOMES_ESTADO, botao, botaoSecundario, caixa, dataHora, preco } from "./_ui";

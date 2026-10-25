@@ -225,7 +225,7 @@ async function diario(
 export async function decidirRecorte(id: string, usar: boolean) {
   await comBanco(async (pool) => {
     await pool.query("UPDATE fichas SET usar_recorte = $1 WHERE id = $2 AND recorte_status = 'pronto'", [usar, id]);
-    await diario(pool, id, "moreno", "ok", [usar ? "recorte aprovado: o Achado da vez usa a foto sem fundo" : "recorte recusado: fica a foto original"], null, null, null);
+    await diario(pool, id, "moreno", "ok", [usar ? "recorte aprovado: nos destaques do topo, usa a foto sem fundo" : "recorte recusado: fica a foto original"], null, null, null);
   });
   atualizarVitrine();
 }

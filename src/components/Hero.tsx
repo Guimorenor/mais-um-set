@@ -5,6 +5,7 @@ import { FundoRecortado } from "./CardRecortado";
 import { Icone } from "./Icone";
 import { Tag } from "./Tag";
 
+// Os 3 destaques usam a foto sem fundo quando o recorte foi aprovado no painel.
 // Destaques vêm das fichas publicadas com "Achado da vez" / "Destaque secundário" no painel.
 export function Hero({ achado, secundarios }: { achado: Oferta | null; secundarios: Oferta[] }) {
   return (
@@ -78,7 +79,7 @@ function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
     <article className="group relative h-[314px] min-w-0 flex-1 overflow-hidden">
       <FundoRecortado raio={64} raioRecorte={24} larguraRecorte={125.44} alturaRecorte={97.7} />
       <img
-        src={oferta.imagem}
+        src={oferta.imagemRecorte ?? oferta.imagem}
         alt=""
         className="pointer-events-none absolute top-7 right-[18px] h-[167px] w-[135px] object-contain transition-transform duration-500 ease-suave group-hover:-translate-y-2 group-hover:-rotate-3 group-hover:scale-105"
       />
@@ -113,7 +114,7 @@ function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
     <article className="group relative flex h-60 min-w-0 flex-1 flex-col gap-5 overflow-hidden p-6">
       <FundoRecortado raio={40} raioRecorte={20} larguraRecorte={96} alturaRecorte={80} />
       <img
-        src={oferta.imagem}
+        src={oferta.imagemRecorte ?? oferta.imagem}
         alt=""
         className="pointer-events-none absolute top-4 right-5 h-[140px] w-[130px] object-contain transition-transform duration-500 ease-suave group-hover:-translate-y-2 group-hover:-rotate-3 group-hover:scale-105"
       />
@@ -146,7 +147,7 @@ function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
     <article className="group relative flex h-[175px] w-[300px] shrink-0 snap-start sm:w-auto sm:min-w-[300px] sm:flex-1 flex-col gap-4 overflow-hidden p-4">
       <FundoRecortado raio={32} raioRecorte={20} larguraRecorte={64.44} alturaRecorte={52.7} />
       <img
-        src={oferta.imagem}
+        src={oferta.imagemRecorte ?? oferta.imagem}
         alt=""
         className="pointer-events-none absolute top-[3px] right-[22px] h-[114px] w-[105px] object-contain transition-transform duration-500 ease-suave group-hover:-translate-y-2 group-hover:-rotate-3 group-hover:scale-105"
       />

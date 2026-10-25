@@ -207,13 +207,13 @@ export default async function FichaPage({ params, searchParams }: Props) {
         )}
       </section>
 
-      {/* Recorte da foto (só para o Achado da vez) */}
+      {/* Recorte da foto (só para os destaques do topo) */}
       {temColunasRecorte && f.imagem && (
         <section className={`mt-6 ${caixa} flex flex-col gap-4`}>
-          <h2 className="text-500 font-semibold text-text-brand">Foto sem fundo (Achado da vez)</h2>
+          <h2 className="text-500 font-semibold text-text-brand">Foto sem fundo (destaques do topo)</h2>
           <p className="text-200 text-text-subtle">
-            O recorte só é usado quando esta oferta é o Achado da vez. O estagiário recorta sozinho a foto do achado atual
-            (a cada 3 h); você aprova antes de ir para o site.
+            O recorte só é usado quando esta oferta está nos destaques do topo (Achado da vez ou secundário). O estagiário
+            recorta sozinho as fotos dos destaques atuais (a cada 3 h); você aprova antes de ir para o site.
           </p>
           <div className="flex flex-wrap gap-4">
             <figure className="flex flex-col gap-1 text-200">

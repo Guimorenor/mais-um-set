@@ -2,9 +2,9 @@
 
 Roda nas máquinas do GitHub (ver .github/workflows/recorte.yml), em horário definido.
 Regras (combinadas com o Moreno):
-  - o recorte é SÓ para o "Achado da vez": recorta a foto do achado atual
-    (o escolhido automaticamente, ou o marcado à mão se o destaque automático estiver desligado)
-    e as fotos que você pedir no painel ("Pedir recorte");
+  - o recorte é SÓ para os destaques do topo (Achado da vez + 2 secundários): recorta as fotos
+    dos destaques atuais (escolhidos automaticamente, ou marcados à mão se o destaque automático
+    estiver desligado) e as fotos que você pedir no painel ("Pedir recorte");
   - no máximo LIMITE imagens por execução (padrão 5);
   - se a automação "recorte" estiver pausada no painel, não faz nada;
   - o recorte NUNCA vai para o site sozinho: fica "pronto" esperando você aprovar no painel;
@@ -94,7 +94,7 @@ def main() -> int:
 
         auto = con.execute("SELECT ativa FROM automacoes WHERE nome = 'destaque_automatico'").fetchone()
         automatico = bool(auto and auto[0])
-        # O achado da vez atual, pela MESMA regra do site (src/lib/destaques.ts e src/lib/vitrine.ts):
+        # Os 3 destaques atuais (achado + 2 secundários), pela MESMA regra do site (src/lib/destaques.ts e src/lib/vitrine.ts):
         # publicada, completa, preço verificado < 36 h; automático = maior desconto confirmado (1–90%).
         achado_sql = (
             """SELECT f.id FROM fichas f
@@ -105,16 +105,17 @@ def main() -> int:
                                AND round((1 - f.preco_atual / f.preco_anterior) * 100) BETWEEN 1 AND 90
                               THEN round((1 - f.preco_atual / f.preco_anterior) * 100) ELSE -1 END DESC,
                          f.verificado_em DESC
-                LIMIT 1"""
+                LIMIT 3"""
             if automatico
-            else "SELECT id FROM fichas WHERE estado = 'publicada' AND destaque = 'achado_da_vez' LIMIT 1"
+            else """SELECT id FROM fichas WHERE estado = 'publicada' AND destaque IN ('achado_da_vez', 'secundario')
+                     ORDER BY destaque = 'achado_da_vez' DESC, publicado_em DESC LIMIT 3"""
         )
         fila = con.execute(
             f"""WITH achado AS ({achado_sql})
                 SELECT f.id, f.imagem FROM fichas f LEFT JOIN recortes r ON r.ficha_id = f.id
                  WHERE f.imagem IS NOT NULL AND (
                        f.recorte_status = 'pendente'                                   -- pedido no painel
-                    OR (f.id IN (SELECT id FROM achado)                                -- achado da vez atual
+                    OR (f.id IN (SELECT id FROM achado)                                -- destaques atuais
                         AND (f.recorte_status IS NULL
                              OR (f.recorte_status = 'pronto' AND r.imagem_origem IS DISTINCT FROM f.imagem))))
                  ORDER BY f.atualizado_em DESC LIMIT %s""",
