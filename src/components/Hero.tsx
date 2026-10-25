@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import { acharCategoria } from "@/lib/categorias";
-import { achadoDaVez, desconto, destaquesSecundarios, formatarPreco, type Oferta } from "@/lib/ofertas";
+import { desconto, formatarPreco, verificadoEm, type Oferta } from "@/lib/ofertas";
 import { FundoRecortado } from "./CardRecortado";
 import { Icone } from "./Icone";
 import { Tag } from "./Tag";
 
-export function Hero() {
+// Destaques vêm das fichas publicadas com "Achado da vez" / "Destaque secundário" no painel.
+export function Hero({ achado, secundarios }: { achado: Oferta | null; secundarios: Oferta[] }) {
   return (
     <section className="flex flex-col gap-4 px-4 py-6 md:gap-6 md:px-6 md:pt-10 lg:gap-8 lg:px-20 lg:py-16 min-[1700px]:flex-row">
       <div className="flex min-w-0 flex-1 flex-col gap-4 md:gap-6 lg:gap-8">
@@ -23,30 +24,30 @@ export function Hero() {
 
         {/* Mobile: o destaque principal vem logo após o título */}
         <div className="lg:hidden">
-          <AchadoDaVez />
+          <AchadoDaVez o={achado} />
         </div>
 
         <div className="hidden gap-2 lg:flex">
-          {destaquesSecundarios.map((o) => (
+          {secundarios.map((o) => (
             <DestaqueSecundarioDesktop key={o.id} oferta={o} />
           ))}
         </div>
       </div>
 
       <div className="hidden min-w-0 flex-1 lg:block">
-        <AchadoDaVez />
+        <AchadoDaVez o={achado} />
       </div>
 
       {/* Tablet: os dois destaques secundários lado a lado */}
       <div className="hidden gap-4 md:flex lg:hidden">
-        {destaquesSecundarios.map((o) => (
+        {secundarios.map((o) => (
           <DestaqueSecundarioTablet key={o.id} oferta={o} />
         ))}
       </div>
 
       {/* Mobile: carrossel dos destaques secundários */}
       <div className="-mx-4 flex snap-x snap-mandatory scroll-px-4 gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] md:hidden">
-        {destaquesSecundarios.map((o) => (
+        {secundarios.map((o) => (
           <DestaqueSecundarioMobile key={o.id} oferta={o} />
         ))}
       </div>
@@ -59,11 +60,17 @@ function rotuloCategoria(o: Oferta) {
 }
 
 function DePor({ oferta, className = "" }: { oferta: Oferta; className?: string }) {
+  if (!oferta.precoDe || !desconto(oferta)) return null;
   return (
     <p className={className}>
       De <span className="line-through">{formatarPreco(oferta.precoDe)}</span>
     </p>
   );
+}
+
+function Desconto({ oferta, tamanho }: { oferta: Oferta; tamanho?: "lg" }) {
+  const pct = desconto(oferta);
+  return pct ? <Tag tamanho={tamanho}>- {pct}%</Tag> : null;
 }
 
 function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
@@ -77,7 +84,7 @@ function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
       />
       <div className="absolute top-[37px] left-6 flex w-[237px] flex-col items-start gap-3">
         <Tag tamanho="sm">{rotuloCategoria(oferta)}</Tag>
-        <h3 className="text-800 leading-800 font-bold tracking-tight text-text-brand">{oferta.titulo}</h3>
+        <h3 className="line-clamp-2 text-650 font-bold tracking-snug text-text-brand">{oferta.titulo}</h3>
       </div>
       <div className="absolute bottom-6 left-6 flex flex-col gap-4 text-text-subtlest">
         <DePor oferta={oferta} className="text-300 leading-400 font-semibold tracking-snug [&>span]:text-400 [&>span]:leading-500" />
@@ -85,7 +92,7 @@ function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
           <p className="text-900 leading-900 font-bold tracking-tighter whitespace-nowrap text-text-brand">
             {formatarPreco(oferta.precoPor)}
           </p>
-          <Tag>- {desconto(oferta)}%</Tag>
+          <Desconto oferta={oferta} />
         </div>
       </div>
       <a
@@ -112,13 +119,13 @@ function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
       />
       <div className="relative flex flex-col items-start gap-2 pr-[120px]">
         <Tag tamanho="sm">{rotuloCategoria(oferta)}</Tag>
-        <h3 className="text-650 font-bold tracking-snug text-text-brand">{oferta.titulo}</h3>
+        <h3 className="line-clamp-2 text-650 font-bold tracking-snug text-text-brand">{oferta.titulo}</h3>
       </div>
       <div className="relative flex flex-col gap-1">
         <DePor oferta={oferta} className="text-200 font-semibold text-text-subtlest" />
         <div className="flex items-center gap-2">
           <p className="text-800 font-bold tracking-tight whitespace-nowrap text-text-brand">{formatarPreco(oferta.precoPor)}</p>
-          <Tag>- {desconto(oferta)}%</Tag>
+          <Desconto oferta={oferta} />
         </div>
       </div>
       <a
@@ -145,13 +152,13 @@ function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
       />
       <div className="relative flex flex-col items-start gap-2 pr-[110px]">
         <Tag tamanho="sm">{rotuloCategoria(oferta)}</Tag>
-        <h3 className="text-500 font-bold text-text-brand">{oferta.titulo}</h3>
+        <h3 className="line-clamp-3 text-500 font-bold text-text-brand">{oferta.titulo}</h3>
       </div>
       <div className="relative flex flex-col gap-0.5">
         <DePor oferta={oferta} className="text-150 font-semibold text-text-subtlest" />
         <div className="flex items-center gap-2">
           <p className="text-600 font-bold whitespace-nowrap text-text-brand">{formatarPreco(oferta.precoPor)}</p>
-          <Tag>- {desconto(oferta)}%</Tag>
+          <Desconto oferta={oferta} />
         </div>
       </div>
       <a
@@ -167,9 +174,24 @@ function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
   );
 }
 
-/** Card grande "Achado da vez": sempre no visual escuro, nos dois temas. */
-function AchadoDaVez() {
-  const o = achadoDaVez;
+/** Card grande "Achado da vez": sempre no visual escuro, nos dois temas. Sem achado, um aviso de "em breve". */
+function AchadoDaVez({ o }: { o: Oferta | null }) {
+  if (!o) {
+    return (
+      <article
+        data-theme="dark"
+        className="relative flex flex-col justify-center gap-3 overflow-hidden rounded-[28px] bg-surface-overlay p-6 text-text-default md:rounded-[40px] md:p-10 lg:h-[558px] lg:rounded-[64px] lg:p-[60px]"
+      >
+        <img src="/home/hero-quadra.webp" alt="" className="pointer-events-none absolute inset-0 size-full object-cover" />
+        <div className="relative flex flex-col items-start gap-3 lg:gap-6">
+          <Tag variante="contorno">Achado da vez</Tag>
+          <h2 className="text-700 font-black md:text-900 md:tracking-tighter lg:text-1000">Novos achados chegando.</h2>
+          <p className="text-300 text-text-subtle md:text-400">Estamos garimpando as próximas ofertas. Volte em breve!</p>
+        </div>
+      </article>
+    );
+  }
+  const pct = desconto(o);
   return (
     <article
       data-theme="dark"
@@ -177,41 +199,50 @@ function AchadoDaVez() {
     >
       <img src="/home/hero-quadra.webp" alt="" className="pointer-events-none absolute inset-0 size-full object-cover transition-transform duration-[1200ms] ease-suave group-hover/achado:scale-[1.03]" />
 
-      {/* raquete (espelhada, como no Figma) */}
-      <div className="pointer-events-none absolute top-[42px] right-2 h-[267px] w-[228px] -scale-x-100 overflow-hidden sm:top-3 sm:bottom-3 sm:h-auto sm:w-[34%] md:relative md:bottom-auto md:top-auto md:right-auto md:order-last md:h-[336px] md:w-[44%] md:shrink-0 lg:absolute lg:top-8 lg:right-8 lg:h-[477px] lg:w-[min(406px,calc(100%-480px))]">
+      {/* foto do produto (vem da loja: fica numa moldura clara arredondada) */}
+      <div className="pointer-events-none absolute top-[42px] right-3 size-[150px] overflow-hidden rounded-3xl bg-white p-2 sm:size-[180px] md:relative md:top-auto md:right-auto md:order-last md:size-[300px] md:shrink-0 md:rounded-[32px] lg:absolute lg:top-1/2 lg:right-[60px] lg:h-auto lg:w-[min(400px,calc(100%-620px))] lg:aspect-square lg:-translate-y-1/2 lg:rounded-[40px]">
         <img
           src={o.imagem}
           alt=""
-          className="absolute top-[-4.58%] left-[-14.14%] h-[107.74%] w-[126.6%] max-w-none sm:top-0 sm:left-0 sm:size-full sm:max-w-full sm:object-contain transition-transform duration-700 ease-suave group-hover/achado:-translate-y-2 group-hover/achado:rotate-3"
+          className="size-full object-contain transition-transform duration-700 ease-suave group-hover/achado:-translate-y-1 group-hover/achado:scale-105"
         />
       </div>
 
-      <div className="relative flex flex-col gap-3 md:min-w-0 md:flex-1 md:gap-4 lg:absolute lg:top-1/2 lg:left-[60px] lg:w-[466px] lg:-translate-y-1/2 lg:gap-12">
+      <div className="relative flex flex-col gap-3 md:min-w-0 md:flex-1 md:gap-4 lg:absolute lg:top-1/2 lg:left-[60px] lg:w-[500px] lg:-translate-y-1/2 lg:gap-8">
         <div className="flex flex-col gap-3 lg:gap-2">
           <div className="flex gap-2">
-            <Tag>{o.rotulo}</Tag>
+            <Tag>{rotuloCategoria(o)}</Tag>
             <Tag variante="contorno">Achado da vez</Tag>
           </div>
-          <h2 className="max-w-[60%] text-700 font-black md:max-w-none md:text-900 md:tracking-tighter lg:w-auto lg:text-1000">
+          <h2 className="max-w-[calc(100%-165px)] text-700 font-black sm:max-w-[calc(100%-195px)] line-clamp-4 md:max-w-none md:text-900 md:tracking-tighter lg:line-clamp-3 lg:w-auto lg:text-800">
             {o.titulo}
           </h2>
         </div>
         <div className="flex flex-col gap-0.5 md:gap-1 lg:gap-2">
-          <p className="text-200 font-semibold text-text-subtle line-through md:text-400 lg:hidden">De {formatarPreco(o.precoDe)}</p>
-          <p className="hidden text-500 leading-500 font-semibold tracking-snug lg:block">
-            De <span className="text-700 leading-700 tracking-tight line-through">{formatarPreco(o.precoDe)}</span>
-          </p>
+          {o.precoDe && pct && (
+            <>
+              <p className="text-200 font-semibold text-text-subtle line-through md:text-400 lg:hidden">De {formatarPreco(o.precoDe)}</p>
+              <p className="hidden text-500 leading-500 font-semibold tracking-snug lg:block">
+                De <span className="text-700 leading-700 tracking-tight line-through">{formatarPreco(o.precoDe)}</span>
+              </p>
+            </>
+          )}
           <div className="flex items-center gap-2 md:gap-4">
             <p className="text-800 font-black whitespace-nowrap md:text-1000 md:tracking-tighter lg:text-1100">
               {formatarPreco(o.precoPor)}
             </p>
-            <span className="flex lg:hidden">
-              <Tag>-{desconto(o)}%</Tag>
-            </span>
-            <span className="hidden lg:flex">
-              <Tag tamanho="lg">- {desconto(o)}%</Tag>
-            </span>
+            {pct && (
+              <>
+                <span className="flex lg:hidden">
+                  <Tag>-{pct}%</Tag>
+                </span>
+                <span className="hidden lg:flex">
+                  <Tag tamanho="lg">- {pct}%</Tag>
+                </span>
+              </>
+            )}
           </div>
+          <p className="text-100 text-text-subtle md:text-200">Preço verificado {verificadoEm(o.verificadoEm)}</p>
         </div>
         <a
           href={o.link}
@@ -223,26 +254,6 @@ function AchadoDaVez() {
           <Icone nome="link-externo" tamanho={24} />
         </a>
       </div>
-
-      {o.video && (
-        <a
-          href={o.link}
-          target="_blank"
-          rel="sponsored noopener"
-          className="group/video absolute right-9 bottom-[31px] hidden transition-transform duration-500 ease-suave hover:-translate-y-1 h-[167px] w-[268px] overflow-hidden rounded-[32px] bg-text-default p-2 lg:max-[1700px]:block min-[1920px]:block"
-        >
-          <span className="relative block h-[200px] overflow-hidden rounded-[28px]">
-            <img src={o.video.thumb} alt="" className="absolute top-[-30.9%] left-0 h-[241.5%] w-full max-w-none transition-transform duration-700 ease-suave group-hover/video:scale-105" />
-            <span className="absolute inset-0 bg-surface-scrim" />
-          </span>
-          <span className="absolute inset-x-0 bottom-0 flex items-center justify-center rounded-b-[32px] bg-action-accent-default p-2 text-400 leading-500 font-semibold text-text-on-accent">
-            {o.video.chamada}
-          </span>
-          <span className="absolute top-[calc(50%-0.5px)] left-1/2 flex size-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center vidro rounded-full text-white [--vidro-desfoque:4px] [--vidro-fundo:var(--surface-scrim)]">
-            <Icone nome="play" tamanho={19} />
-          </span>
-        </a>
-      )}
     </article>
   );
 }

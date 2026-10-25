@@ -87,7 +87,11 @@ export default async function Painel({ searchParams }: Props) {
       <section className="mt-4 flex flex-col gap-2">
         {visiveis.length === 0 && (
           <p className="py-8 text-center text-300 text-text-subtle">
-            Nada aqui. {filtro === "fila" && <Link className="underline" href="/admin/nova">Cadastre a primeira oferta</Link>}
+            {filtro === "fila" ? (
+              fichas.length ? "Nenhuma oferta esperando revisão." : <Link className="underline" href="/admin/nova">Cadastre a primeira oferta</Link>
+            ) : (
+              "Nada aqui."
+            )}
           </p>
         )}
         {visiveis.map((f) => (

@@ -5,7 +5,7 @@ import { GradeOfertas } from "@/components/GradeOfertas";
 import { Header } from "@/components/Header";
 import { Hero } from "@/components/Hero";
 import { acharCategoria } from "@/lib/categorias";
-import { ofertas } from "@/lib/ofertas";
+import { lerVitrine } from "@/lib/vitrine";
 
 type Props = { searchParams: Promise<{ categoria?: string; busca?: string }> };
 
@@ -13,9 +13,10 @@ export default async function Home({ searchParams }: Props) {
   const { categoria: slug, busca: buscaBruta } = await searchParams;
   const categoria = acharCategoria(slug);
   const busca = buscaBruta?.trim() || undefined;
+  const vitrine = await lerVitrine();
 
   const normalizar = (s: string) => s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
-  const filtradas = ofertas.filter(
+  const filtradas = vitrine.ofertas.filter(
     (o) => (!categoria || o.categoria === categoria.slug) && (!busca || normalizar(o.titulo).includes(normalizar(busca))),
   );
 
@@ -23,10 +24,10 @@ export default async function Home({ searchParams }: Props) {
     <>
       <Header categoriaAtiva={categoria?.slug} busca={busca} />
       <main>
-        <Hero />
+        <Hero achado={vitrine.achado} secundarios={vitrine.secundarios} />
         <FaixaOfertas />
         <FiltroCategorias ativa={categoria?.slug} />
-        <GradeOfertas ofertas={filtradas} categoria={categoria} busca={busca} />
+        <GradeOfertas ofertas={filtradas} categoria={categoria} busca={busca} vitrineVazia={vitrine.ofertas.length === 0} />
       </main>
       <Footer />
     </>

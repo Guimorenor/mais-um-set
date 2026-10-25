@@ -9,7 +9,17 @@ import { ProductCard } from "./ProductCard";
 const POR_VEZ_MOBILE = 6; // múltiplo de 2: as linhas de 2 cards fecham certinho
 
 // "Achados para o próximo set": grade de ofertas (filtrada por categoria ou busca).
-export function GradeOfertas({ ofertas, categoria, busca }: { ofertas: Oferta[]; categoria?: Categoria; busca?: string }) {
+export function GradeOfertas({
+  ofertas,
+  categoria,
+  busca,
+  vitrineVazia = false,
+}: {
+  ofertas: Oferta[];
+  categoria?: Categoria;
+  busca?: string;
+  vitrineVazia?: boolean;
+}) {
   const [visiveisMobile, setVisiveisMobile] = useState(POR_VEZ_MOBILE);
   const titulo = busca ? `Resultados para “${busca}”` : categoria ? `Achados em ${categoria.nome}` : "Achados para o próximo set";
   const n = ofertas.length;
@@ -43,7 +53,11 @@ export function GradeOfertas({ ofertas, categoria, busca }: { ofertas: Oferta[];
       </div>
 
       {n === 0 ? (
-        <p className="mt-8 text-400 text-text-subtle">Nenhum achado por aqui ainda. Tente outra busca ou categoria.</p>
+        <p className="mt-8 text-400 text-text-subtle">
+          {vitrineVazia
+            ? "Novos achados chegando. Volte em breve!"
+            : "Nenhum achado por aqui ainda. Tente outra busca ou categoria."}
+        </p>
       ) : (
         <div className="mt-4 grid grid-cols-2 gap-3 sm:gap-4 md:mt-6 md:gap-y-6 lg:gap-x-6 lg:gap-y-8 xl:grid-cols-3 2xl:grid-cols-4">
           {ofertas.map((o, i) => (

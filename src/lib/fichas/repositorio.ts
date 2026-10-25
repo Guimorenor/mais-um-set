@@ -2,11 +2,15 @@
 // Toda mudança de estado passa pelo regulamento (regras.ts) e vira uma linha no diário.
 import "server-only";
 import type { Pool } from "@neondatabase/serverless";
+import { revalidateTag } from "next/cache";
 import { comBanco } from "@/lib/db/conexao";
 import type { CategoriaSlug } from "@/lib/categorias";
 import { mudancas, podeMudarEstado, type Autor, type Destaque, type Estado, type Ficha } from "./regras";
 
 type Linha = Record<string, unknown>;
+// Avisa o site que a vitrine mudou (os cards se atualizam na hora, sem esperar 60 s)
+const atualizarVitrine = () => revalidateTag("vitrine");
+
 const num = (v: unknown) => (v === null || v === undefined ? null : Number(v));
 
 function paraFicha(r: Linha): Ficha {
@@ -148,6 +152,7 @@ export async function editarFicha(id: string, e: Edicao) {
     }
     await pool.query(`UPDATE fichas SET ${sets.join(", ")}, atualizado_em = now() WHERE id = $${vals.length}`, vals);
   });
+  atualizarVitrine();
 }
 
 /** Muda o estado se o regulamento deixar; anota no diário. */
@@ -166,6 +171,7 @@ export async function mudarEstado(id: string, para: Estado, autor: Autor, motivo
     );
     await diario(pool, id, autor, "estado", motivo?.trim() ? [`motivo: ${motivo.trim()}`] : [], null, atual.ficha.estado, para);
   });
+  atualizarVitrine();
   return { ok: true };
 }
 
@@ -190,6 +196,7 @@ export async function registrarVerificacao(
     );
     await diario(pool, id, autor, m.length ? "mudou" : "ok", m, null, null, null);
   });
+  atualizarVitrine();
 }
 
 async function diario(

@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import { acharCategoria, imagemMascote, temaCategoria } from "@/lib/categorias";
-import { desconto, formatarPreco, type Oferta } from "@/lib/ofertas";
+import { desconto, formatarPreco, verificadoEm, type Oferta } from "@/lib/ofertas";
 import { Icone } from "./Icone";
 import { Tag } from "./Tag";
 
@@ -9,6 +9,7 @@ import { Tag } from "./Tag";
 // se mexe e a seta do botão avança. A barra sobre a foto é Glass (cor da categoria).
 export function ProductCard({ oferta }: { oferta: Oferta }) {
   const categoria = acharCategoria(oferta.categoria);
+  const pct = desconto(oferta);
   return (
     <article
       style={temaCategoria(oferta.categoria)}
@@ -47,13 +48,16 @@ export function ProductCard({ oferta }: { oferta: Oferta }) {
             {oferta.observacao && <p className="text-300 leading-400 text-text-subtle max-sm:hidden">{oferta.observacao}</p>}
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-500 leading-500 font-semibold tracking-snug text-text-subtle max-sm:text-150 max-sm:leading-150 max-sm:tracking-none">{formatarPreco(oferta.precoDe)}</p>
+            {oferta.precoDe && pct && (
+              <p className="text-500 leading-500 font-semibold tracking-snug text-text-subtle line-through max-sm:text-150 max-sm:leading-150 max-sm:tracking-none">{formatarPreco(oferta.precoDe)}</p>
+            )}
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <p className="text-800 leading-800 font-bold tracking-tight whitespace-nowrap text-text-brand max-sm:text-600 max-sm:leading-600 max-sm:tracking-snug">
                 {formatarPreco(oferta.precoPor)}
               </p>
-              <Tag>-{desconto(oferta)}%</Tag>
+              {pct && <Tag>-{pct}%</Tag>}
             </div>
+            <p className="text-100 leading-200 text-text-subtlest">Preço verificado {verificadoEm(oferta.verificadoEm)}</p>
           </div>
         </div>
         <a
