@@ -74,15 +74,43 @@ export async function obterTokenML(): Promise<string | null> {
   return novo.access_token;
 }
 
+// ── Passe do próprio app (client credentials) ─────────────────────────────────
+// Prova de 2026-10-25: o catálogo responde com um passe do APP, sem depender da sua conta.
+// Vale ~6 h e é pedido de novo sozinho quando vence — a conferência automática não precisa de reconexão.
+// Usamos só para LER (GET). Nunca sai do servidor.
+let passeDoApp: { token: string; expira: number } | null = null;
+
+export async function obterPasseDoApp(): Promise<string | null> {
+  if (passeDoApp && passeDoApp.expira > Date.now()) return passeDoApp.token;
+  if (!process.env.ML_CLIENT_ID || !process.env.ML_CLIENT_SECRET) return null;
+  const r = await fetch(`${API}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded", Accept: "application/json" },
+    body: new URLSearchParams({
+      grant_type: "client_credentials",
+      client_id: process.env.ML_CLIENT_ID,
+      client_secret: process.env.ML_CLIENT_SECRET,
+    }),
+    cache: "no-store",
+    signal: AbortSignal.timeout(10_000),
+  }).catch(() => null);
+  if (!r?.ok) return null;
+  const d = (await r.json()) as RespostaToken;
+  if (!d.access_token) return null;
+  passeDoApp = { token: d.access_token, expira: Date.now() + Math.max(60, (d.expires_in ?? 21600) - 600) * 1000 };
+  return passeDoApp.token;
+}
+
 export type ResultadoCatalogo = { ok: true; dados: DadosCatalogo } | { ok: false; erro: string; naoEncontrado?: boolean };
 
 /** Lê o produto de catálogo e escolhe a oferta (a do anúncio da URL, ou a de menor preço). */
 export async function lerCatalogo(idCatalogo: string, idAnuncio: string | null): Promise<ResultadoCatalogo> {
-  const token = (await obterTokenML().catch(() => null)) ?? undefined;
+  // Primeiro o passe do app (não expira para nós); se falhar, o da sua conta conectada
+  const token = (await obterPasseDoApp().catch(() => null)) ?? (await obterTokenML().catch(() => null)) ?? undefined;
   const produto = await consultar(`/products/${idCatalogo}`, token);
   if (produto.status === 404) return { ok: false, erro: "Produto de catálogo não encontrado.", naoEncontrado: true };
   if (!produto.ok) {
-    return { ok: false, erro: produto.status === 401 || produto.status === 403 ? "O Mercado Livre pediu login: conecte a conta no painel." : `Falha ao ler o catálogo (HTTP ${produto.status || "sem resposta"}).` };
+    return { ok: false, erro: produto.status === 401 || produto.status === 403 ? "O Mercado Livre recusou o passe do app e não há conta conectada: confira as chaves ML_CLIENT_ID/SECRET ou conecte a conta no painel." : `Falha ao ler o catálogo (HTTP ${produto.status || "sem resposta"}).` };
   }
   const p = produto.corpo as { name?: string; status?: string; pictures?: { url?: string; secure_url?: string }[] };
 

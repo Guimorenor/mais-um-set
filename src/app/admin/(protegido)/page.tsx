@@ -86,14 +86,17 @@ export default async function Painel({ searchParams }: Props) {
 
       <section className={`mt-6 ${caixa} flex flex-wrap items-center justify-between gap-3 py-4`}>
         <p className="text-300">
-          Mercado Livre:{" "}
+          Catálogo do Mercado Livre: <strong>passe do próprio app</strong> (renova sozinho, não precisa conectar).
+          <br />
+          <span className="text-200 text-text-subtle">Conta conectada (reserva):{" "}
           {!ml.conectado
-            ? "não conectado (o catálogo pode funcionar mesmo assim; conecte se a consulta pedir login)."
+            ? "não conectada."
             : ml.valida
               ? `conectado · acesso vale até ${dataHora(ml.expiraEm)}${ml.renovavel ? " (renova sozinho)" : ""}`
               : ml.renovavel
                 ? "conectado · renova sozinho na próxima consulta"
                 : "acesso expirado · reconecte"}
+          </span>
         </p>
         <a href="/api/ml/autorizar?para=painel" className={botaoSecundario}>
           {ml.conectado ? "Reconectar" : "Conectar Mercado Livre"}
