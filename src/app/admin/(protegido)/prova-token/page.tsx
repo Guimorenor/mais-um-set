@@ -66,6 +66,40 @@ export default async function ProvaPasse() {
   }
   testes.push({ nome: "Ofertas SEM passe nenhum", r: await consultar(`/products/${CATALOGO}/items`) });
 
+  // ── Portas para ACHAR produtos sozinho (todas oficiais) ──
+  const descoberta: { nome: string; r: Resposta; resumo: string }[] = [];
+  let categoria: string | null = null;
+  if (passe.token) {
+    const ofertas = await consultar(`/products/${CATALOGO}/items`, passe.token);
+    categoria = ((ofertas.corpo as { results?: { category_id?: string }[] } | null)?.results?.[0]?.category_id) ?? null;
+    const buscaCatalogo = await consultar(`/products/search?status=active&site_id=MLB&q=${encodeURIComponent("bola de tenis")}&limit=5`, passe.token);
+    const res = (buscaCatalogo.corpo as { results?: { id?: string; name?: string }[]; paging?: { total?: number } } | null);
+    descoberta.push({
+      nome: "Busca no CATÁLOGO por palavra (/products/search?q=bola de tenis)",
+      r: buscaCatalogo,
+      resumo: res?.results ? `${res.paging?.total ?? "?"} produtos · ex.: ${res.results.slice(0, 3).map((x) => x.name).join(" | ")}` : "",
+    });
+    if (categoria) {
+      const destaques = await consultar(`/highlights/MLB/category/${categoria}`, passe.token);
+      const c = destaques.corpo as { content?: { id?: string; type?: string }[] } | null;
+      descoberta.push({
+        nome: `Mais vendidos da categoria (/highlights/MLB/category/${categoria})`,
+        r: destaques,
+        resumo: c?.content ? `${c.content.length} itens · tipos: ${[...new Set(c.content.map((x) => x.type))].join(", ")}` : "",
+      });
+    }
+    descoberta.push({ nome: "Busca geral por palavra (/sites/MLB/search) — já sabíamos que é fechada", r: await consultar(`/sites/MLB/search?q=bola%20de%20tenis&limit=1`, passe.token), resumo: "" });
+  }
+
+  // ── Formato do seu link de afiliado (só para ver para onde o meli.la leva; nada é alterado) ──
+  let destinoMeliLa: string | null = null;
+  try {
+    const r = await fetch("https://meli.la/2rRsq5s", { redirect: "manual", cache: "no-store", signal: AbortSignal.timeout(10_000) });
+    destinoMeliLa = r.headers.get("location") ?? `HTTP ${r.status} sem redirecionamento`;
+  } catch (e) {
+    destinoMeliLa = `não consegui abrir: ${e instanceof Error ? e.message : e}`;
+  }
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-10 text-text-default">
       <p className="text-200 font-semibold text-text-subtlest uppercase">Prova técnica · só em preview</p>
@@ -83,6 +117,26 @@ export default async function ProvaPasse() {
       <section className="mt-6 rounded-[32px] border border-border-default bg-surface-default p-6">
         <h2 className="text-500 font-semibold text-text-brand">2. O catálogo responde? · {new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}</h2>
         <table className="mt-3 w-full text-left text-200"><tbody>{testes.map((t) => <Linha key={t.nome} {...t} />)}</tbody></table>
+      </section>
+
+      <section className="mt-6 rounded-[32px] border border-border-default bg-surface-default p-6">
+        <h2 className="text-500 font-semibold text-text-brand">3. Portas para achar produtos sozinho</h2>
+        <table className="mt-3 w-full text-left text-200">
+          <tbody>
+            {descoberta.map((t) => (
+              <tr key={t.nome} className="border-t border-border-default align-top">
+                <td className="py-2 pr-4">{t.nome}</td>
+                <td className="py-2 pr-4 font-semibold">{t.r.status ? `HTTP ${t.r.status}` : "sem resposta"}</td>
+                <td className="py-2 break-all text-text-subtle">{t.r.ok ? `✅ ${t.resumo}` : ((t.r.corpo as { message?: string } | null)?.message ?? "❌")}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="mt-6 rounded-[32px] border border-border-default bg-surface-default p-6">
+        <h2 className="text-500 font-semibold text-text-brand">4. Para onde o seu meli.la leva</h2>
+        <p className="mt-3 text-200 break-all">{destinoMeliLa}</p>
       </section>
     </main>
   );
