@@ -69,6 +69,7 @@ export default async function ProvaPasse() {
   // ── Portas para ACHAR produtos sozinho (todas oficiais) ──
   const descoberta: { nome: string; r: Resposta; resumo: string }[] = [];
   let categoria: string | null = null;
+  let produtoTeste: { id: string; nome: string } | null = null;
   if (passe.token) {
     const ofertas = await consultar(`/products/${CATALOGO}/items`, passe.token);
     categoria = ((ofertas.corpo as { results?: { category_id?: string }[] } | null)?.results?.[0]?.category_id) ?? null;
@@ -82,6 +83,11 @@ export default async function ProvaPasse() {
     if (categoria) {
       const destaques = await consultar(`/highlights/MLB/category/${categoria}`, passe.token);
       const c = destaques.corpo as { content?: { id?: string; type?: string }[] } | null;
+      const primeiro = c?.content?.find((x) => x.type === "PRODUCT")?.id;
+      if (primeiro) {
+        const p = await consultar(`/products/${primeiro}`, passe.token);
+        produtoTeste = { id: primeiro, nome: (p.corpo as { name?: string } | null)?.name ?? primeiro };
+      }
       descoberta.push({
         nome: `Mais vendidos da categoria (/highlights/MLB/category/${categoria})`,
         r: destaques,
@@ -133,6 +139,16 @@ export default async function ProvaPasse() {
           </tbody>
         </table>
       </section>
+
+      {produtoTeste && (
+        <section className="mt-6 rounded-[32px] border border-border-default bg-surface-default p-6">
+          <h2 className="text-500 font-semibold text-text-brand">5. Link de teste de comissão (montado pelo sistema)</h2>
+          <p className="mt-2 text-300">Produto: {produtoTeste.nome} ({produtoTeste.id})</p>
+          <code className="mt-2 block rounded-xl bg-surface-subtle p-3 text-200 break-all">
+            {`https://www.mercadolivre.com.br/p/${produtoTeste.id}?matt_word=guilhermemorenoribeiro&matt_tool=33244529`}
+          </code>
+        </section>
+      )}
 
       <section className="mt-6 rounded-[32px] border border-border-default bg-surface-default p-6">
         <h2 className="text-500 font-semibold text-text-brand">4. Para onde o seu meli.la leva</h2>
