@@ -13,6 +13,7 @@ import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { rodarConferencia, rodarGarimpo } from "@/lib/garimpo/servidor";
 import { descontoConfiavel } from "@/lib/fichas/regras";
+import { categorias } from "@/lib/categorias";
 
 export const maxDuration = 300; // o botão "Rodar agora" pode levar alguns minutos
 
@@ -31,6 +32,25 @@ async function salvarDescontoMinimo(form: FormData) {
   if (!(n >= 1 && n <= 90)) redirect(`/admin?erro=${encodeURIComponent("Desconto mínimo precisa ser de 1 a 90%.")}`);
   await comBanco((pool) => pool.query("UPDATE configuracoes SET valor = $1 WHERE chave = 'desconto_minimo'", [String(n)]));
   redirect(`/admin?ok=${encodeURIComponent(`Desconto mínimo agora é ${n}%.`)}`);
+}
+
+async function adicionarBusca(form: FormData) {
+  "use server";
+  await exigirDono();
+  const termo = String(form.get("termo") ?? "").trim().toLowerCase().slice(0, 80);
+  const categoria = String(form.get("categoria") ?? "");
+  const lista = (campo: string) =>
+    String(form.get(campo) ?? "").split(",").map((p) => p.trim().toLowerCase()).filter(Boolean).slice(0, 20);
+  if (termo.length < 3 || !categorias.some((c) => c.slug === categoria)) {
+    redirect(`/admin?erro=${encodeURIComponent("Busca precisa de um termo (3+ letras) e uma categoria.")}`);
+  }
+  await comBanco((pool) =>
+    pool.query(
+      "INSERT INTO buscas (termo, categoria, obrigatorias, proibidas) VALUES ($1, $2, $3, $4) ON CONFLICT (termo) DO UPDATE SET categoria = $2, obrigatorias = $3, proibidas = $4, ativa = true",
+      [termo, categoria, lista("obrigatorias"), lista("proibidas")],
+    ),
+  );
+  redirect(`/admin?ok=${encodeURIComponent(`Busca "${termo}" adicionada.`)}`);
 }
 
 async function alternarBusca(form: FormData) {
@@ -219,6 +239,19 @@ export default async function Painel({ searchParams }: Props) {
             <button className={botaoSecundario}>Salvar</button>
           </form>
           <p className="text-200 text-text-subtle">Buscas (clique para ligar/desligar):</p>
+          <details className="text-200">
+            <summary className="cursor-pointer font-semibold">+ Adicionar busca</summary>
+            <form action={adicionarBusca} className="mt-2 grid gap-2 sm:grid-cols-2">
+              <input name="termo" required placeholder="O que procurar (ex.: raquete de tenis prince)" className="rounded-xl border border-border-input bg-surface-default px-3 py-2" />
+              <select name="categoria" required defaultValue="" className="rounded-xl border border-border-input bg-surface-default px-3 py-2">
+                <option value="" disabled>Categoria…</option>
+                {categorias.map((c) => <option key={c.slug} value={c.slug}>{c.nome}</option>)}
+              </select>
+              <input name="obrigatorias" placeholder="O nome precisa ter uma destas (ex.: raquete, raquetes)" className="rounded-xl border border-border-input bg-surface-default px-3 py-2" />
+              <input name="proibidas" placeholder="E nenhuma destas (ex.: padel, beach, usada)" className="rounded-xl border border-border-input bg-surface-default px-3 py-2" />
+              <button className={`${botaoSecundario} sm:col-span-2`}>Adicionar</button>
+            </form>
+          </details>
           <div className="flex flex-wrap gap-2">
             {extras.buscas.map((b) => (
               <form key={b.id} action={alternarBusca}>

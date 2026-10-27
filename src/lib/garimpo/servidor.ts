@@ -23,11 +23,11 @@ import {
 } from "./regras";
 
 const PRAZO_MS = 240_000; // para antes dos 300 s da função
-const POR_BUSCA = 20;
-const MAX_PRODUTOS = 80;
-const MAX_FICHAS_NOVAS = 15;
-const MAX_CONFERENCIAS = 80;
-const AO_MESMO_TEMPO = 4;
+const POR_BUSCA = 50;
+const MAX_PRODUTOS = 300;
+const MAX_FICHAS_NOVAS = 40;
+const MAX_CONFERENCIAS = 150;
+const AO_MESMO_TEMPO = 6;
 
 export async function lerConfigGarimpo(): Promise<ConfigGarimpo & { ligadas: Record<string, boolean> }> {
   return comBanco(async (pool) => {
@@ -93,10 +93,16 @@ export async function rodarGarimpo(): Promise<string> {
     }
   }
 
-  // 2) Pular o que já tem ficha
+  // 2) Pular o que já tem ficha e o que já foi conferido nas últimas 12 h (economiza consultas)
   const jaTem = new Set(
     await comBanco(async (pool) =>
-      (await pool.query("SELECT id_catalogo FROM fichas WHERE id_catalogo = ANY($1)", [[...candidatos.keys()]])).rows.map((r) => r.id_catalogo as string),
+      (
+        await pool.query(
+          `SELECT id_catalogo FROM fichas WHERE id_catalogo = ANY($1)
+           UNION SELECT id_catalogo FROM historico_precos WHERE id_catalogo = ANY($1) AND quando > now() - interval '12 hours'`,
+          [[...candidatos.keys()]],
+        )
+      ).rows.map((r) => r.id_catalogo as string),
     ),
   );
   const fila = [...candidatos].filter(([id]) => !jaTem.has(id));
