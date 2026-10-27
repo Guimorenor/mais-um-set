@@ -8,6 +8,8 @@ import { lerCategoria, lerImagem, lerPreco, textoOuNull } from "@/lib/fichas/for
 import { descontoConfiavel, linkAfiliadoValido, pendenciasParaPublicar, podeMudarEstado, ESTADOS, type Destaque, type Estado } from "@/lib/fichas/regras";
 import { buscarFicha, decidirRecorte, editarFicha, mudarEstado, pedirRecorte, registrarVerificacao, type Edicao } from "@/lib/fichas/repositorio";
 import { lerAutomacoes } from "@/lib/automacoes";
+import { publicarPeloGarimpo } from "@/lib/fichas/repositorio";
+import { lerConfigGarimpo } from "@/lib/garimpo/servidor";
 import { precoAnteriorValido } from "@/lib/ml/catalogo";
 import { lerCatalogo } from "@/lib/ml/servidor";
 import { exigirDono } from "@/lib/painel";
@@ -54,6 +56,11 @@ async function salvar(form: FormData) {
     e.verificadoAgora = form.get("conferi") === "on";
   }
   await editarFicha(id, e);
+  // Ficha do garimpo que ganhou o meli.la: se tudo estiver certo, publica na hora (publicação automática)
+  if (atual.ficha.origem === "garimpo" && ["rascunho", "em_revisao"].includes(atual.ficha.estado) && link) {
+    const r = await publicarPeloGarimpo(id, await lerConfigGarimpo(), "link de afiliado colado");
+    voltar(id, "ok", r.ok ? "Link salvo e oferta publicada sozinha (desconto confirmado)." : `Alterações salvas. Ainda não publicou sozinha: ${r.motivo}`);
+  }
   voltar(id, "ok", "Alterações salvas.");
 }
 
@@ -142,7 +149,8 @@ export default async function FichaPage({ params, searchParams }: Props) {
         <h1 className="text-700 font-bold text-text-brand">{f.tituloCurto ?? f.tituloLoja ?? f.idProdutoLoja}</h1>
         <EtiquetaEstado estado={f.estado} />
       </div>
-      {f.motivo && <p className="mt-1 text-200 text-text-subtle">Motivo: {f.motivo}</p>}
+      {f.origem === "garimpo" && <p className="mt-1 text-200 text-text-subtle">🤖 Achada pelo garimpo automático</p>}
+      {f.motivo && <p className="mt-1 text-200 text-text-subtle">Motivo: {f.motivo}{f.alteradoPor === "automacao" && " (automação)"}</p>}
 
       <div className="mt-4 flex flex-col gap-3">
         {ok && <Aviso tipo="ok">{ok}</Aviso>}

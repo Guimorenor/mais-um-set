@@ -5,7 +5,8 @@ import type { Pool } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
 import { comBanco } from "@/lib/db/conexao";
 import type { CategoriaSlug } from "@/lib/categorias";
-import { mudancas, podeMudarEstado, type Autor, type Destaque, type Estado, type Ficha } from "./regras";
+import { mudancas, podeMudarEstado, type Autor, type Destaque, type Estado, type Ficha, type Resultado } from "./regras";
+import { podePublicarSozinho, type ConfigGarimpo } from "@/lib/garimpo/regras";
 
 type Linha = Record<string, unknown>;
 // Avisa o site que a vitrine mudou (os cards se atualizam na hora, sem esperar 60 s)
@@ -43,6 +44,8 @@ function paraFicha(r: Linha): Ficha {
     recorteStatus: (r.recorte_status as Ficha["recorteStatus"]) ?? null,
     recorteErro: (r.recorte_erro as string) ?? null,
     usarRecorte: Boolean(r.usar_recorte),
+    origem: (r.origem as Ficha["origem"]) ?? "manual",
+    alteradoPor: (r.alterado_por as Autor) ?? null,
   };
 }
 
@@ -103,6 +106,7 @@ export type NovaFicha = {
   statusNaLoja: string | null;
   verificadoEm: Date | null;
   fonte: string | null;
+  origem?: "manual" | "garimpo";
 };
 
 /** Cria em "rascunho". Se o produto já existe, devolve o id do existente (nunca duplica). */
@@ -110,15 +114,15 @@ export async function criarFicha(n: NovaFicha): Promise<{ id: string; jaExistia:
   return comBanco(async (pool) => {
     const { rows } = await pool.query(
       `INSERT INTO fichas (id_produto_loja, url_original, id_catalogo, link_afiliado, titulo_loja, titulo_curto, imagem,
-         vendedor, categoria, observacao, preco_atual, preco_anterior, moeda, status_na_loja, verificado_em, fonte)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+         vendedor, categoria, observacao, preco_atual, preco_anterior, moeda, status_na_loja, verificado_em, fonte, origem)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
        ON CONFLICT (loja, id_produto_loja) DO NOTHING
        RETURNING id`,
       [n.idProdutoLoja, n.urlOriginal, n.idCatalogo, n.linkAfiliado, n.tituloLoja, n.tituloCurto, n.imagem, n.vendedor,
-        n.categoria, n.observacao, n.precoAtual, n.precoAnterior, n.moeda, n.statusNaLoja, n.verificadoEm, n.fonte],
+        n.categoria, n.observacao, n.precoAtual, n.precoAnterior, n.moeda, n.statusNaLoja, n.verificadoEm, n.fonte, n.origem ?? "manual"],
     );
     if (rows[0]) {
-      await diario(pool, rows[0].id, "moreno", "estado", [], null, null, "rascunho");
+      await diario(pool, rows[0].id, n.origem === "garimpo" ? "automacao" : "moreno", "estado", n.origem === "garimpo" ? ["achada pelo garimpo"] : [], null, null, "rascunho");
       return { id: rows[0].id as string, jaExistia: false };
     }
     const existente = await pool.query("SELECT id FROM fichas WHERE loja = 'mercado-livre' AND id_produto_loja = $1", [n.idProdutoLoja]);
@@ -173,11 +177,11 @@ export async function mudarEstado(id: string, para: Estado, autor: Autor, motivo
   if (!regra.ok) return regra;
   await comBanco(async (pool) => {
     await pool.query(
-      `UPDATE fichas SET estado = $1::estado_oferta, motivo = $2, atualizado_em = now(),
+      `UPDATE fichas SET estado = $1::estado_oferta, motivo = $2, atualizado_em = now(), alterado_por = $4,
          publicado_em = CASE WHEN $1::estado_oferta = 'publicada' THEN now() ELSE publicado_em END,
          destaque = CASE WHEN $1::estado_oferta = 'publicada' THEN destaque ELSE 'nenhum' END
        WHERE id = $3`,
-      [para, ["rejeitada", "pausada", "expirada"].includes(para) ? motivo?.trim() : null, id],
+      [para, ["rejeitada", "pausada", "expirada"].includes(para) ? motivo?.trim() : null, id, autor],
     );
     await diario(pool, id, autor, "estado", motivo?.trim() ? [`motivo: ${motivo.trim()}`] : [], null, atual.ficha.estado, para);
   });
@@ -237,4 +241,45 @@ export async function pedirRecorte(id: string) {
     await diario(pool, id, "moreno", "ok", ["recorte pedido: entra na próxima execução"], null, null, null);
   });
   atualizarVitrine();
+}
+
+// ── Garimpo automático (Etapa 6) ──────────────────────────────────────────────
+
+/**
+ * Publicação pela AUTOMAÇÃO: só pela porta do garimpo (podePublicarSozinho), que confere
+ * interruptor, origem, link de afiliado, dados completos, preço recente e desconto mínimo.
+ */
+export async function publicarPeloGarimpo(id: string, cfg: ConfigGarimpo, motivo = "desconto confirmado"): Promise<Resultado> {
+  const atual = await buscarFicha(id);
+  if (!atual) return { ok: false, motivo: "Ficha não encontrada." };
+  const regra = podePublicarSozinho(atual.ficha, cfg);
+  if (!regra.ok) return regra;
+  await comBanco(async (pool) => {
+    await pool.query(
+      `UPDATE fichas SET estado = 'publicada', motivo = NULL, alterado_por = 'automacao', publicado_em = now(), atualizado_em = now()
+        WHERE id = $1`,
+      [id],
+    );
+    await diario(pool, id, "automacao", "estado", [`publicada sozinha: ${motivo}`], null, atual.ficha.estado, "publicada");
+  });
+  atualizarVitrine();
+  return { ok: true };
+}
+
+export async function anotarPreco(idCatalogo: string, itemId: string | null, preco: number, precoAnterior: number | null) {
+  await comBanco((pool) =>
+    pool.query("INSERT INTO historico_precos (id_catalogo, item_id, preco, preco_anterior) VALUES ($1, $2, $3, $4)", [
+      idCatalogo, itemId, preco, precoAnterior,
+    ]),
+  );
+}
+
+export async function menorPreco30d(idCatalogo: string): Promise<number | null> {
+  return comBanco(async (pool) => {
+    const { rows } = await pool.query(
+      "SELECT min(preco) AS m FROM historico_precos WHERE id_catalogo = $1 AND quando > now() - interval '30 days'",
+      [idCatalogo],
+    );
+    return rows[0]?.m === null || rows[0]?.m === undefined ? null : Number(rows[0].m);
+  });
 }

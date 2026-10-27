@@ -42,6 +42,9 @@ export type Ficha = {
   recorteStatus?: "pendente" | "pronto" | "erro" | null;
   recorteErro?: string | null;
   usarRecorte?: boolean;
+  // Garimpo automático (Etapa 6)
+  origem?: "manual" | "garimpo";
+  alteradoPor?: Autor | null; // quem fez a última mudança de estado
 };
 
 /** Depois de quanto tempo sem verificação o preço é considerado velho (decisão: 36 h). */
@@ -93,7 +96,7 @@ export function podeMudarEstado(ficha: Ficha, para: Estado, autor: Autor, motivo
 
 // ── Publicação ────────────────────────────────────────────────────────────────
 
-/** Link de afiliado aceito: encurtado meli.la ou o link /sec/ do Mercado Livre. Nunca o link comum do produto. */
+/** Link de afiliado aceito: meli.la, /sec/ do Mercado Livre ou link com a etiqueta de afiliado. Nunca o link comum do produto. */
 export function linkAfiliadoValido(link: string | null | undefined): boolean {
   if (!link) return false;
   try {
@@ -102,6 +105,10 @@ export function linkAfiliadoValido(link: string | null | undefined): boolean {
     const host = u.hostname.toLowerCase();
     if (host === "meli.la") return u.pathname.length > 1;
     if (/(^|\.)mercadolivre\.com$/.test(host)) return u.pathname.startsWith("/sec/");
+    // Link com a etiqueta oficial de afiliado (matt_word + matt_tool), montado pelo garimpo
+    if (/(^|\.)mercadolivre\.com\.br$/.test(host)) {
+      return Boolean(u.searchParams.get("matt_word")?.trim() && /^\d+$/.test(u.searchParams.get("matt_tool") ?? ""));
+    }
     return false;
   } catch {
     return false;
