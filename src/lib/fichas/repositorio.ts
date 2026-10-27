@@ -283,3 +283,35 @@ export async function menorPreco30d(idCatalogo: string): Promise<number | null> 
     return rows[0]?.m === null || rows[0]?.m === undefined ? null : Number(rows[0].m);
   });
 }
+
+export const NOMES_METODO: Record<string, string> = {
+  fundo_branco: "Fundo branco",
+  birefnet: "BiRefNet",
+  isnet: "ISNet",
+};
+
+/** As versões de recorte que o estagiário gerou e qual está em uso. */
+export async function opcoesRecorte(id: string): Promise<{ metodos: string[]; emUso: string | null }> {
+  return comBanco(async (pool) => {
+    const existe = await pool.query("SELECT to_regclass('recorte_opcoes') AS t");
+    if (!existe.rows[0].t) return { metodos: [], emUso: null };
+    const o = await pool.query("SELECT metodo FROM recorte_opcoes WHERE ficha_id = $1 ORDER BY array_position(ARRAY['fundo_branco','birefnet','isnet'], metodo)", [id]);
+    const r = await pool.query("SELECT metodo FROM recortes WHERE ficha_id = $1", [id]);
+    return { metodos: o.rows.map((x) => x.metodo as string), emUso: (r.rows[0]?.metodo as string) ?? null };
+  });
+}
+
+/** Você escolhe outra versão do recorte: ela passa a ser a usada no site. */
+export async function escolherOpcaoRecorte(id: string, metodo: string) {
+  await comBanco(async (pool) => {
+    const r = await pool.query(
+      `UPDATE recortes SET png = o.png, metodo = o.metodo, criado_em = now()
+         FROM recorte_opcoes o WHERE recortes.ficha_id = $1 AND o.ficha_id = $1 AND o.metodo = $2`,
+      [id, metodo],
+    );
+    if (!r.rowCount) return;
+    await pool.query("UPDATE fichas SET usar_recorte = true WHERE id = $1", [id]);
+    await diario(pool, id, "moreno", "ok", [`recorte trocado para a versão "${NOMES_METODO[metodo] ?? metodo}"`], null, null, null);
+  });
+  atualizarVitrine();
+}

@@ -1,5 +1,5 @@
 # Estagiário de edição: recorta o fundo das fotos das ofertas (automacao/recortar.py).
-# Frequência: a cada 3 horas. Limite: 5 fotos por vez, 15 minutos no máximo.
+# Frequência: a cada 3 horas. Limite: 5 fotos por vez (até 3 versões cada), 25 minutos no máximo.
 # Pausar: no painel (Automações → Recorte) ou aqui no GitHub (Actions → Recorte de fotos → Disable workflow).
 name: Recorte de fotos
 
@@ -21,7 +21,7 @@ permissions:
 jobs:
   recortar:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     env:
       REMBG_HOME: ${{ github.workspace }}/.modelos
       LIMITE: "5"
@@ -36,7 +36,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .modelos
-          key: rembg-isnet-general-use-v1
+          key: rembg-modelos-v2-isnet-birefnet
       - run: pip install -r automacao/requirements.txt
       - name: Recortar
         run: python automacao/recortar.py

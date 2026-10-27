@@ -17,6 +17,17 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     if (sessao?.user?.githubId !== DONO_GITHUB_ID) return naoTem();
   }
 
+  // Prévia de uma das versões (?opcao=fundo_branco|birefnet|isnet), só para o dono
+  const opcao = req.nextUrl.searchParams.get("opcao");
+  if (previa && opcao) {
+    const png = await comBanco(async (pool) => {
+      const { rows } = await pool.query("SELECT png FROM recorte_opcoes WHERE ficha_id = $1 AND metodo = $2", [id, opcao]);
+      return rows[0]?.png as Buffer | undefined;
+    }).catch(() => undefined);
+    if (!png) return naoTem();
+    return new NextResponse(new Uint8Array(png), { headers: { "Content-Type": "image/png", "Cache-Control": "private, no-store" } });
+  }
+
   const linha = await comBanco(async (pool) => {
     const { rows } = await pool.query(
       `SELECT r.png, f.usar_recorte, (r.imagem_origem = f.imagem) AS atual

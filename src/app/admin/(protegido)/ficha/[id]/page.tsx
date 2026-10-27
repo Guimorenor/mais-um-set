@@ -6,7 +6,10 @@ import { notFound, redirect } from "next/navigation";
 import { categorias } from "@/lib/categorias";
 import { lerCategoria, lerImagem, lerPreco, textoOuNull } from "@/lib/fichas/formulario";
 import { descontoConfiavel, linkAfiliadoValido, pendenciasParaPublicar, podeMudarEstado, ESTADOS, type Destaque, type Estado } from "@/lib/fichas/regras";
-import { buscarFicha, decidirRecorte, editarFicha, mudarEstado, pedirRecorte, registrarVerificacao, type Edicao } from "@/lib/fichas/repositorio";
+import {
+  NOMES_METODO, buscarFicha, decidirRecorte, editarFicha, escolherOpcaoRecorte, mudarEstado, opcoesRecorte, pedirRecorte,
+  registrarVerificacao, type Edicao,
+} from "@/lib/fichas/repositorio";
 import { lerAutomacoes } from "@/lib/automacoes";
 import { publicarPeloGarimpo } from "@/lib/fichas/repositorio";
 import { lerConfigGarimpo } from "@/lib/garimpo/servidor";
@@ -108,6 +111,10 @@ async function recorte(form: FormData) {
   await exigirDono();
   const id = String(form.get("id"));
   const acao = String(form.get("acao"));
+  if (acao.startsWith("opcao:")) {
+    await escolherOpcaoRecorte(id, acao.slice(6));
+    voltar(id, "ok", "Versão do recorte trocada.");
+  }
   if (acao === "usar") await decidirRecorte(id, true);
   else if (acao === "recusar") await decidirRecorte(id, false);
   else await pedirRecorte(id);
@@ -133,6 +140,7 @@ export default async function FichaPage({ params, searchParams }: Props) {
   const automacoes = await lerAutomacoes().catch(() => []);
   const destaqueAuto = automacoes.find((a) => a.nome === "destaque_automatico")?.ativa ?? false;
   const temColunasRecorte = automacoes.length > 0;
+  const opcoes = temColunasRecorte ? await opcoesRecorte(f.id).catch(() => ({ metodos: [] as string[], emUso: null })) : { metodos: [] as string[], emUso: null };
   const pct = descontoConfiavel(f);
   const falta = pendenciasParaPublicar(f);
   const acoes = ESTADOS.filter((e) => e !== f.estado && ROTULO_ACAO[e]).filter((e) => {
@@ -228,7 +236,21 @@ export default async function FichaPage({ params, searchParams }: Props) {
               <img src={f.imagem} alt="" className="size-40 rounded-2xl bg-white object-contain" />
               <figcaption className="text-text-subtle">Original</figcaption>
             </figure>
-            {f.recorteStatus === "pronto" && (
+            {f.recorteStatus === "pronto" && opcoes.metodos.length > 0 && opcoes.metodos.map((m) => (
+              <figure key={m} className="flex flex-col gap-1 text-200">
+                <img
+                  src={`/api/recorte/${f.id}?previa=1&opcao=${m}&t=${f.atualizadoEm.getTime()}`}
+                  alt=""
+                  className={`size-40 rounded-2xl bg-[repeating-conic-gradient(#ccc_0_25%,#fff_0_50%)] bg-[length:16px_16px] object-contain ${opcoes.emUso === m ? "ring-4 ring-border-brand" : ""}`}
+                />
+                <figcaption className="text-text-subtle">
+                  {NOMES_METODO[m] ?? m}
+                  {opcoes.emUso === m ? (f.usarRecorte ? " · ✅ no site" : " · escolhida") : ""}
+                </figcaption>
+                {opcoes.emUso !== m && <BotaoRecorte id={f.id} acao={`opcao:${m}`} rotulo="Usar esta" />}
+              </figure>
+            ))}
+            {f.recorteStatus === "pronto" && opcoes.metodos.length === 0 && (
               <figure className="flex flex-col gap-1 text-200">
                 <img
                   src={`/api/recorte/${f.id}?previa=1&t=${f.atualizadoEm.getTime()}`}

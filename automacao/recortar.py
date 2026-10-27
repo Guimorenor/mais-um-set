@@ -25,6 +25,7 @@ from scipy import ndimage
 
 LIMITE = int(os.environ.get("LIMITE", "5"))
 TAMANHO_MAX = 900  # lado maior do PNG final, em px
+# Até 3 versões por foto (fundo branco, BiRefNet, ISNet); cada uma tem limite de tempo próprio.
 HOSTS_PERMITIDOS = ("mlstatic.com",)  # fotos do Mercado Livre
 
 
@@ -39,12 +40,41 @@ def limpar_mascara(alfa: np.ndarray) -> np.ndarray:
     return np.where(manter, alfa, 0).astype(np.uint8)
 
 
-def recortar(original: bytes, sessao) -> tuple[bytes, int, int]:
-    """Foto → PNG transparente, cortado justo no produto (com uma folguinha) e reduzido."""
-    from rembg import remove
+# Ordem de preferência: o primeiro que der certo vai para o site (você pode trocar na ficha)
+METODOS = ("fundo_branco", "birefnet", "isnet")
+MODELOS = {"birefnet": "birefnet-general", "isnet": "isnet-general-use"}
 
+
+def fundo_branco(img: Image.Image, tolerancia: int = 18) -> Image.Image | None:
+    """Para fotos com fundo branco liso (o comum no Mercado Livre): tira só o branco que ENCOSTA
+    na borda da foto. O branco de DENTRO do produto (embalagem, janela, etiqueta) fica."""
+    from PIL import ImageFilter
+
+    a = np.asarray(img.convert("RGB")).astype(np.int16)
+    quase_branco = (a.min(axis=2) >= 255 - tolerancia) & ((a.max(axis=2) - a.min(axis=2)) <= 12)
+    borda = np.concatenate([quase_branco[0], quase_branco[-1], quase_branco[:, 0], quase_branco[:, -1]])
+    if borda.mean() < 0.9:
+        return None  # a foto não tem fundo branco liso: este método não serve
+    rotulos, _ = ndimage.label(quase_branco)
+    ids_borda = np.unique(np.concatenate([rotulos[0], rotulos[-1], rotulos[:, 0], rotulos[:, -1]]))
+    fundo = np.isin(rotulos, ids_borda[ids_borda > 0])
+    alfa = Image.fromarray(np.where(fundo, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(0.8))
+    saida = img.convert("RGBA")
+    saida.putalpha(alfa)
+    return saida
+
+
+def recortar(original: bytes, sessao=None, metodo: str = "isnet") -> tuple[bytes, int, int]:
+    """Foto → PNG transparente, cortado justo no produto (com uma folguinha) e reduzido."""
     img = Image.open(io.BytesIO(original)).convert("RGB")
-    saida = remove(img, session=sessao, post_process_mask=True)
+    if metodo == "fundo_branco":
+        saida = fundo_branco(img)
+        if saida is None:
+            raise ValueError("a foto não tem fundo branco liso")
+    else:
+        from rembg import remove
+
+        saida = remove(img, session=sessao, post_process_mask=True)
     rgba = np.array(saida)
     rgba[..., 3] = limpar_mascara(rgba[..., 3])
     saida = Image.fromarray(rgba, "RGBA")
@@ -62,6 +92,20 @@ def recortar(original: bytes, sessao) -> tuple[bytes, int, int]:
     buf = io.BytesIO()
     final.save(buf, "PNG", optimize=True)
     return buf.getvalue(), final.width, final.height
+
+
+def recortar_em_processo_separado(original: bytes, metodo: str, limite_s: int = 180) -> tuple[bytes, int, int]:
+    """Modelos pesados rodam num processo à parte: se faltar memória ou tempo, só esta versão falha."""
+    import pickle
+    import subprocess
+
+    r = subprocess.run(
+        [sys.executable, __file__, "--um", metodo],
+        input=original, capture_output=True, timeout=limite_s,
+    )
+    if r.returncode != 0:
+        raise RuntimeError(f"{metodo} falhou (código {r.returncode}): {r.stderr.decode(errors='ignore')[-200:]}")
+    return pickle.loads(r.stdout)
 
 
 def baixar(url: str) -> bytes:
@@ -130,20 +174,37 @@ def main() -> int:
         aprova = con.execute("SELECT ativa FROM automacoes WHERE nome = 'recorte_aprovacao_automatica'").fetchone()
         aprovar_sozinho = bool(aprova and aprova[0])
 
-        from rembg import new_session
-
-        sessao = new_session("isnet-general-use")
         ok = erros = 0
         for ficha_id, imagem in fila:
             inicio = time.time()
             try:
-                png, w, h = recortar(baixar(imagem), sessao)
+                original = baixar(imagem)
+                versoes: dict[str, tuple[bytes, int, int]] = {}
+                falhas: list[str] = []
+                for metodo in METODOS:
+                    try:
+                        if metodo == "fundo_branco":
+                            versoes[metodo] = recortar(original, metodo=metodo)
+                        else:
+                            versoes[metodo] = recortar_em_processo_separado(original, metodo)
+                    except Exception as e:  # noqa: BLE001 — cada versão é independente
+                        falhas.append(f"{metodo}: {str(e)[:120]}")
+                if not versoes:
+                    raise ValueError("nenhum método conseguiu recortar (" + "; ".join(falhas) + ")")
+                escolhido = next(m for m in METODOS if m in versoes)
+                png, w, h = versoes[escolhido]
                 with con.transaction():
+                    con.execute("DELETE FROM recorte_opcoes WHERE ficha_id = %s", (ficha_id,))
+                    for metodo, (png_m, _, _) in versoes.items():
+                        con.execute(
+                            "INSERT INTO recorte_opcoes (ficha_id, metodo, png) VALUES (%s, %s, %s)",
+                            (ficha_id, metodo, png_m),
+                        )
                     con.execute(
-                        """INSERT INTO recortes (ficha_id, png, imagem_origem, largura, altura) VALUES (%s, %s, %s, %s, %s)
+                        """INSERT INTO recortes (ficha_id, png, imagem_origem, largura, altura, metodo) VALUES (%s, %s, %s, %s, %s, %s)
                            ON CONFLICT (ficha_id) DO UPDATE SET png = EXCLUDED.png, imagem_origem = EXCLUDED.imagem_origem,
-                             largura = EXCLUDED.largura, altura = EXCLUDED.altura, criado_em = now()""",
-                        (ficha_id, png, imagem, w, h),
+                             largura = EXCLUDED.largura, altura = EXCLUDED.altura, metodo = EXCLUDED.metodo, criado_em = now()""",
+                        (ficha_id, png, imagem, w, h, escolhido),
                     )
                     con.execute(
                         "UPDATE fichas SET recorte_status = 'pronto', recorte_erro = NULL, usar_recorte = %s WHERE id = %s",
@@ -153,13 +214,16 @@ def main() -> int:
                         "INSERT INTO verificacoes (ficha_id, autor, resultado, mudancas) VALUES (%s, 'automacao', 'ok', %s)",
                         (
                             ficha_id,
-                            ["recorte da foto pronto e já em uso no site (aprovação automática)"]
-                            if aprovar_sozinho
-                            else ["recorte da foto pronto: aguardando sua aprovação"],
+                            [
+                                f"recorte pronto ({len(versoes)} versões; em uso: {escolhido})"
+                                + (" e já no site (aprovação automática)" if aprovar_sozinho else ": aguardando sua aprovação")
+                            ],
                         ),
                     )
                 ok += 1
-                print(f"  ✓ {ficha_id} ({w}x{h}, {time.time() - inicio:.1f} s)")
+                print(f"  ✓ {ficha_id} ({', '.join(versoes)}; em uso: {escolhido}; {time.time() - inicio:.1f} s)")
+                for f in falhas:
+                    print(f"    · {f}")
             except Exception as e:  # noqa: BLE001 — cada foto é independente
                 msg = str(e)[:300]
                 with con.transaction():
@@ -178,5 +242,22 @@ def main() -> int:
     return 0
 
 
+def um_metodo(metodo: str) -> int:
+    """Modo processo separado: lê a foto da entrada, devolve o recorte (pickle) na saída."""
+    import pickle
+
+    saida = os.fdopen(os.dup(1), "wb")
+    sys.stdout = sys.stderr  # avisos e barras de download não podem sujar a resposta
+    from rembg import new_session
+
+    original = sys.stdin.buffer.read()
+    resultado = recortar(original, new_session(MODELOS[metodo]), metodo)
+    saida.write(pickle.dumps(resultado))
+    saida.flush()
+    return 0
+
+
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["--um"]:
+        sys.exit(um_metodo(sys.argv[2]))
     sys.exit(main())
