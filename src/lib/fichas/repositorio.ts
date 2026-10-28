@@ -46,6 +46,8 @@ function paraFicha(r: Linha): Ficha {
     usarRecorte: Boolean(r.usar_recorte),
     origem: (r.origem as Ficha["origem"]) ?? "manual",
     alteradoPor: (r.alterado_por as Autor) ?? null,
+    imagemTipo: (r.imagem_tipo as Ficha["imagemTipo"]) ?? null,
+    imagemAjuste: (r.imagem_ajuste as Ficha["imagemAjuste"]) ?? undefined,
   };
 }
 
@@ -132,12 +134,13 @@ export async function criarFicha(n: NovaFicha): Promise<{ id: string; jaExistia:
 
 /** Campos que você pode editar à mão no painel. */
 export type Edicao = Partial<
-  Pick<Ficha, "linkAfiliado" | "tituloCurto" | "categoria" | "observacao" | "destaque" | "tituloLoja" | "imagem" | "precoAtual" | "precoAnterior">
+  Pick<Ficha, "linkAfiliado" | "tituloCurto" | "categoria" | "observacao" | "destaque" | "tituloLoja" | "imagem" | "precoAtual" | "precoAnterior" | "imagemAjuste">
 > & { verificadoAgora?: boolean };
 
 const COLUNAS: Record<string, string> = {
   linkAfiliado: "link_afiliado", tituloCurto: "titulo_curto", categoria: "categoria", observacao: "observacao",
   destaque: "destaque", tituloLoja: "titulo_loja", imagem: "imagem", precoAtual: "preco_atual", precoAnterior: "preco_anterior",
+  imagemAjuste: "imagem_ajuste",
 };
 
 export async function editarFicha(id: string, e: Edicao) {

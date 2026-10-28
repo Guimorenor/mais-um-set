@@ -64,6 +64,27 @@ def fundo_branco(img: Image.Image, tolerancia: int = 18) -> Image.Image | None:
     return saida
 
 
+def classificar(original: bytes) -> tuple[str, str]:
+    """Olha a foto e diz como mostrar no card:
+    - "fundo_liso": a borda da foto é quase toda de UMA cor (branco, cinza…) → produto inteiro, com respiro;
+    - "cena": borda variada (quadra, madeira, pessoas) → a foto pode preencher o espaço.
+    Devolve também a cor do fundo (para o card usar a mesma cor em volta do produto)."""
+    img = Image.open(io.BytesIO(original))
+    if img.mode in ("RGBA", "LA", "P"):  # foto já sem fundo (transparente): olhamos sobre branco
+        fundo_branco_ = Image.new("RGBA", img.size, (255, 255, 255, 255))
+        fundo_branco_.alpha_composite(img.convert("RGBA"))
+        img = fundo_branco_
+    img = img.convert("RGB")
+    img.thumbnail((400, 400))
+    a = np.asarray(img).astype(np.int16)
+    e = 3  # faixa de 3 px em volta
+    borda = np.concatenate([a[:e].reshape(-1, 3), a[-e:].reshape(-1, 3), a[:, :e].reshape(-1, 3), a[:, -e:].reshape(-1, 3)])
+    cor = np.median(borda, axis=0)
+    uniforme = (np.abs(borda - cor).max(axis=1) <= 18).mean()
+    hexa = "#%02x%02x%02x" % tuple(int(c) for c in cor)
+    return ("fundo_liso" if uniforme >= 0.85 else "cena"), hexa
+
+
 def recortar(original: bytes, sessao=None, metodo: str = "isnet") -> tuple[bytes, int, int]:
     """Foto → PNG transparente, cortado justo no produto (com uma folguinha) e reduzido."""
     img = Image.open(io.BytesIO(original)).convert("RGB")
@@ -122,6 +143,46 @@ def baixar(url: str) -> bytes:
     return r.content
 
 
+LIMITE_ENQUADRAMENTO = int(os.environ.get("LIMITE_ENQUADRAMENTO", "150"))
+
+
+def enquadrar(con) -> None:
+    """Classifica as fotos das fichas (em revisão, publicadas e pausadas) que ainda não foram olhadas
+    ou cuja foto mudou. Rápido (~0,3 s por foto); limite por execução."""
+    existe = con.execute("SELECT to_regclass('fichas') IS NOT NULL AND EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'fichas' AND column_name = 'imagem_tipo')").fetchone()
+    if not existe or not existe[0]:
+        print("Enquadramento: migração 010 ainda não aplicada. Pulando.")
+        return
+    ativa = con.execute("SELECT ativa FROM automacoes WHERE nome = 'enquadramento'").fetchone()
+    if not ativa or not ativa[0]:
+        print("Enquadramento pausado no painel.")
+        return
+    fila = con.execute(
+        """SELECT id, imagem FROM fichas
+            WHERE imagem IS NOT NULL AND estado IN ('rascunho', 'em_revisao', 'publicada', 'pausada')
+              AND imagem_tipo_origem IS DISTINCT FROM imagem
+            ORDER BY (estado = 'publicada') DESC, atualizado_em DESC LIMIT %s""",
+        (LIMITE_ENQUADRAMENTO,),
+    ).fetchall()
+    ok = erros = 0
+    for ficha_id, imagem in fila:
+        try:
+            tipo, fundo = classificar(baixar(imagem))
+            con.execute(
+                "UPDATE fichas SET imagem_tipo = %s, imagem_fundo = %s, imagem_tipo_origem = %s WHERE id = %s",
+                (tipo, fundo, imagem, ficha_id),
+            )
+            ok += 1
+        except Exception as e:  # noqa: BLE001
+            erros += 1
+            print(f"  ✗ enquadramento {ficha_id}: {str(e)[:150]}")
+    con.execute(
+        "UPDATE automacoes SET ultima_execucao = now(), ultimo_resultado = %s WHERE nome = 'enquadramento'",
+        (f"{ok} foto(s) analisada(s), {erros} erro(s)",),
+    )
+    print(f"Enquadramento: {ok} analisadas, {erros} erros.")
+
+
 def main() -> int:
     import psycopg
 
@@ -130,7 +191,9 @@ def main() -> int:
         print("Falta o segredo DATABASE_URL no GitHub. Nada feito.")
         return 1
 
-    with psycopg.connect(url_banco, connect_timeout=15) as con:
+    with psycopg.connect(url_banco, connect_timeout=15, autocommit=True) as con:
+        enquadrar(con)
+
         ativa = con.execute("SELECT ativa FROM automacoes WHERE nome = 'recorte'").fetchone()
         if not ativa or not ativa[0]:
             print("Automação 'recorte' está pausada no painel. Nada feito.")

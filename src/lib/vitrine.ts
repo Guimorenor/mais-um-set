@@ -7,7 +7,7 @@ import { unstable_cache } from "next/cache";
 import { comBanco, variavelDoBanco } from "@/lib/db/conexao";
 import { categorias, type CategoriaSlug } from "@/lib/categorias";
 import { LIMITE_PRECO_VELHO_HORAS } from "@/lib/fichas/regras";
-import type { Oferta } from "@/lib/ofertas";
+import { decidirEnquadramento, type Oferta } from "@/lib/ofertas";
 import { escolherDestaques } from "@/lib/destaques";
 
 export const TAG_VITRINE = "vitrine";
@@ -22,9 +22,13 @@ async function lerDoBanco(): Promise<Vitrine> {
     const { rows, automatico } = await comBanco(async (pool) => {
       // as colunas de recorte/automação chegam na migração 004; antes dela, segue sem elas
       const temRecorte = Boolean((await pool.query("SELECT to_regclass('recortes') AS t")).rows[0].t);
+      const temEnquadramento = Boolean(
+        (await pool.query("SELECT 1 FROM information_schema.columns WHERE table_name = 'fichas' AND column_name = 'imagem_ajuste'")).rowCount,
+      );
       const r = await pool.query(
         `SELECT f.id, f.titulo_curto, f.titulo_loja, f.categoria, f.imagem, f.preco_atual, f.preco_anterior, f.link_afiliado,
                 f.observacao, f.verificado_em, f.destaque,
+                ${temEnquadramento ? "f.imagem_tipo, f.imagem_fundo, f.imagem_ajuste," : "null AS imagem_tipo, null AS imagem_fundo, null AS imagem_ajuste,"}
                 ${temRecorte ? "(f.usar_recorte AND rc.imagem_origem = f.imagem) AS com_recorte, extract(epoch FROM rc.criado_em)::bigint AS versao_recorte" : "false AS com_recorte, null AS versao_recorte"}
            FROM fichas f
            ${temRecorte ? "LEFT JOIN recortes rc ON rc.ficha_id = f.id" : ""}
@@ -59,6 +63,8 @@ async function lerDoBanco(): Promise<Vitrine> {
           observacao: r.observacao ?? undefined,
           verificadoEm: new Date(r.verificado_em).toISOString(),
           imagemRecorte: r.com_recorte ? `/api/recorte/${r.id}?v=${r.versao_recorte}` : undefined,
+          enquadramento: decidirEnquadramento(r.imagem_tipo, r.imagem_ajuste),
+          fundoImagem: r.imagem_fundo ?? undefined,
         };
         return { oferta, destaqueManual: r.destaque as string, temRecorte: Boolean(r.com_recorte) };
       });
@@ -70,4 +76,4 @@ async function lerDoBanco(): Promise<Vitrine> {
 }
 
 /** Guardada por 60 s (o painel limpa na hora quando você muda uma ficha). */
-export const lerVitrine = unstable_cache(lerDoBanco, ["vitrine-v2"], { revalidate: 60, tags: [TAG_VITRINE] });
+export const lerVitrine = unstable_cache(lerDoBanco, ["vitrine-v3"], { revalidate: 60, tags: [TAG_VITRINE] });

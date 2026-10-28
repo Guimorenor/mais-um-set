@@ -10,17 +10,24 @@ import { Tag } from "./Tag";
 export function ProductCard({ oferta }: { oferta: Oferta }) {
   const categoria = acharCategoria(oferta.categoria);
   const pct = desconto(oferta);
+  const inteira = (oferta.enquadramento ?? "inteira") === "inteira";
   return (
     <article
       style={temaCategoria(oferta.categoria)}
       className="group relative flex w-full flex-col overflow-hidden rounded-[32px] max-sm:rounded-3xl border border-border-default bg-surface-default shadow-[0_8px_16px_-4px_rgba(17,25,38,0.12),0_4px_8px_-2px_rgba(17,25,38,0.06)] transition-[transform,scale,translate,rotate,box-shadow,border-color] duration-500 ease-suave hover:-translate-y-1.5 hover:border-border-brand hover:shadow-[0_24px_48px_-12px_rgba(17,25,38,0.22),0_8px_16px_-6px_rgba(17,25,38,0.10)]"
     >
-      <div className="relative h-[414px] shrink-0 overflow-hidden bg-surface-default max-sm:aspect-square max-sm:h-auto">
+      <div
+        className="relative h-[414px] shrink-0 overflow-hidden bg-surface-default max-sm:aspect-square max-sm:h-auto"
+        style={inteira ? { backgroundColor: oferta.fundoImagem ?? "#ffffff" } : undefined}
+      >
+        {/* Foto com cenário preenche; produto em fundo liso aparece inteiro, acima da faixa da categoria */}
         <img
           src={oferta.imagem}
           alt={oferta.titulo}
           loading="lazy"
-          className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-suave group-hover:scale-[1.04]"
+          className={`absolute inset-0 size-full transition-transform duration-700 ease-suave group-hover:scale-[1.04] ${
+            inteira ? "object-contain px-8 pt-8 pb-24 max-sm:px-3 max-sm:pt-3 max-sm:pb-12" : "object-cover"
+          }`}
         />
         <div className="absolute inset-x-0 bottom-0 bg-linear-to-b from-transparent to-black/40">
           <div

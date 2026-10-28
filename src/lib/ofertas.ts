@@ -15,7 +15,20 @@ export type Oferta = {
   link: string; // link de afiliado (meli.la)
   observacao?: string;
   verificadoEm: string; // ISO: quando o preço foi conferido
+  enquadramento?: Enquadramento; // como a foto aparece no card
+  fundoImagem?: string; // cor do fundo da foto (#rrggbb), usada em volta do produto inteiro
 };
+
+export type Enquadramento = "inteira" | "preencher";
+
+/**
+ * Como mostrar a foto no card. Você manda (ajuste na ficha); senão, o que o estagiário viu:
+ * foto com cenário preenche; produto em fundo liso aparece inteiro. Sem análise ainda: inteira (nunca corta).
+ */
+export function decidirEnquadramento(tipo: string | null | undefined, ajuste: string | null | undefined): Enquadramento {
+  if (ajuste === "inteira" || ajuste === "preencher") return ajuste;
+  return tipo === "cena" ? "preencher" : "inteira";
+}
 
 export const formatarPreco = (valor: number) => {
   const centavos = Number.isInteger(valor) ? 0 : 2;

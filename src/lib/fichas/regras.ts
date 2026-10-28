@@ -45,6 +45,9 @@ export type Ficha = {
   // Garimpo automático (Etapa 6)
   origem?: "manual" | "garimpo";
   alteradoPor?: Autor | null; // quem fez a última mudança de estado
+  // Enquadramento da foto no card
+  imagemTipo?: "cena" | "fundo_liso" | null;
+  imagemAjuste?: "auto" | "inteira" | "preencher";
 };
 
 /** Depois de quanto tempo sem verificação o preço é considerado velho (decisão: 36 h). */

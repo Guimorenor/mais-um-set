@@ -1,6 +1,15 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { escolherDestaques, type Candidata } from "./destaques.ts";
+import { decidirEnquadramento } from "./ofertas.ts";
+
+test("enquadramento: ajuste da ficha manda; senão cena preenche e fundo liso fica inteira", () => {
+  assert.equal(decidirEnquadramento("cena", "auto"), "preencher");
+  assert.equal(decidirEnquadramento("fundo_liso", "auto"), "inteira");
+  assert.equal(decidirEnquadramento(null, null), "inteira"); // sem análise: nunca corta
+  assert.equal(decidirEnquadramento("cena", "inteira"), "inteira");
+  assert.equal(decidirEnquadramento("fundo_liso", "preencher"), "preencher");
+});
 
 const c = (id: string, por: number, de: number | null, extra: Partial<Candidata> = {}, verificado = "2026-10-25T10:00:00Z"): Candidata => ({
   oferta: { id, titulo: id, categoria: "bolinhas", loja: "Mercado Livre", imagem: "x", precoPor: por, precoDe: de, link: "l", verificadoEm: verificado },

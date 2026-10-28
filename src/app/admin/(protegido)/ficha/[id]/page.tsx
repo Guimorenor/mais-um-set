@@ -41,6 +41,8 @@ async function salvar(form: FormData) {
     categoria: lerCategoria(form.get("categoria")),
     observacao: textoOuNull(form.get("observacao"), 200),
   };
+  const ajuste = String(form.get("imagem_ajuste") ?? "");
+  if (["auto", "inteira", "preencher"].includes(ajuste)) e.imagemAjuste = ajuste as Edicao["imagemAjuste"];
   // o campo de destaque só existe no formulário quando o destaque automático está desligado
   if (form.has("destaque")) {
     const destaque = String(form.get("destaque")) as Destaque;
@@ -291,6 +293,18 @@ export default async function FichaPage({ params, searchParams }: Props) {
           </select>
         </label>
         <Campo rotulo="Observação" nome="observacao" valor={f.observacao} />
+        {f.imagemAjuste && (
+          <label className="flex flex-col gap-1 text-300">
+            <span className="font-semibold">Foto no card</span>
+            <select name="imagem_ajuste" className={campo} defaultValue={f.imagemAjuste}>
+              <option value="auto">
+                Automático{f.imagemTipo ? ` (o estagiário viu: ${f.imagemTipo === "cena" ? "foto com cenário → preencher" : "fundo liso → produto inteiro"})` : " (ainda não analisada → produto inteiro)"}
+              </option>
+              <option value="inteira">Produto inteiro (com respiro)</option>
+              <option value="preencher">Preencher o espaço</option>
+            </select>
+          </label>
+        )}
         {f.estado === "publicada" && destaqueAuto && (
           <p className="text-200 text-text-subtle">
             Destaque do topo: <strong>automático</strong> (maior desconto confirmado vira o Achado da vez). Para escolher à mão,
