@@ -111,7 +111,7 @@ function DestaqueSecundarioDesktop({ oferta }: { oferta: Oferta }) {
 
 function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
   return (
-    <article className="group relative flex h-60 min-w-0 flex-1 flex-col gap-5 overflow-hidden p-6">
+    <article className="group relative flex min-h-60 min-w-0 flex-1 flex-col gap-5 overflow-hidden p-6">
       <FundoRecortado raio={40} raioRecorte={20} larguraRecorte={96} alturaRecorte={80} />
       <img
         src={oferta.imagemRecorte ?? oferta.imagem}
@@ -122,7 +122,7 @@ function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
         <Tag tamanho="sm">{rotuloCategoria(oferta)}</Tag>
         <h3 className="line-clamp-2 text-650 font-bold tracking-snug text-text-brand">{oferta.titulo}</h3>
       </div>
-      <div className="relative flex flex-col gap-1">
+      <div className="relative mt-auto flex flex-col gap-1 pr-24">
         <DePor oferta={oferta} className="text-200 font-semibold text-text-subtlest" />
         <div className="flex items-center gap-2">
           <p className="text-800 font-bold tracking-tight whitespace-nowrap text-text-brand">{formatarPreco(oferta.precoPor)}</p>
@@ -144,7 +144,7 @@ function DestaqueSecundarioTablet({ oferta }: { oferta: Oferta }) {
 
 function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
   return (
-    <article className="group relative flex h-[175px] w-[300px] shrink-0 snap-start sm:w-auto sm:min-w-[300px] sm:flex-1 flex-col gap-4 overflow-hidden p-4">
+    <article className="group relative flex min-h-[175px] w-[300px] shrink-0 snap-start sm:w-auto sm:min-w-[300px] sm:flex-1 flex-col gap-4 overflow-hidden p-4">
       <FundoRecortado raio={32} raioRecorte={20} larguraRecorte={64.44} alturaRecorte={52.7} />
       <img
         src={oferta.imagemRecorte ?? oferta.imagem}
@@ -153,9 +153,9 @@ function DestaqueSecundarioMobile({ oferta }: { oferta: Oferta }) {
       />
       <div className="relative flex flex-col items-start gap-2 pr-[110px]">
         <Tag tamanho="sm">{rotuloCategoria(oferta)}</Tag>
-        <h3 className="line-clamp-3 text-500 font-bold text-text-brand">{oferta.titulo}</h3>
+        <h3 className="line-clamp-2 text-500 font-bold text-text-brand">{oferta.titulo}</h3>
       </div>
-      <div className="relative flex flex-col gap-0.5">
+      <div className="relative mt-auto flex flex-col gap-0.5 pr-16">
         <DePor oferta={oferta} className="text-150 font-semibold text-text-subtlest" />
         <div className="flex items-center gap-2">
           <p className="text-600 font-bold whitespace-nowrap text-text-brand">{formatarPreco(oferta.precoPor)}</p>
