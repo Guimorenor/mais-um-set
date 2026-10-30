@@ -7,7 +7,9 @@ export const AWIN_API = "https://api.awin.com";
 export type RespostaAwin = { status: number; ok: boolean; corpo: unknown; erro?: string };
 
 export function configAwin() {
-  return { token: process.env.AWIN_API_TOKEN ?? "", publisher: process.env.AWIN_PUBLISHER_ID ?? "" };
+  // o painel da Awin às vezes mostra o número com zero na frente (03138078): a API usa sem (3138078)
+  const publisher = (process.env.AWIN_PUBLISHER_ID ?? "").trim().replace(/^0+(?=\d)/, "");
+  return { token: (process.env.AWIN_API_TOKEN ?? "").trim(), publisher };
 }
 
 async function chamar(caminho: string, init: RequestInit = {}): Promise<RespostaAwin> {
