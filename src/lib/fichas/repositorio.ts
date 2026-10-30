@@ -11,7 +11,13 @@ import { podePublicarSozinho, type ConfigGarimpo } from "@/lib/garimpo/regras";
 
 type Linha = Record<string, unknown>;
 // Avisa o site que a vitrine mudou (os cards se atualizam na hora, sem esperar 60 s)
-const atualizarVitrine = () => revalidateTag("vitrine");
+const atualizarVitrine = () => {
+  try {
+    revalidateTag("vitrine");
+  } catch {
+    // fora do site (automações no GitHub): a vitrine se atualiza sozinha em até 60 s
+  }
+};
 
 const num = (v: unknown) => (v === null || v === undefined ? null : Number(v));
 

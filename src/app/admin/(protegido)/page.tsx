@@ -12,17 +12,25 @@ import { exigirDono } from "@/lib/painel";
 import { revalidateTag } from "next/cache";
 import { redirect } from "next/navigation";
 import { rodarConferencia, rodarGarimpo } from "@/lib/garimpo/servidor";
+import { dispararWorkflow } from "@/lib/estagiario";
+
+export const maxDuration = 300; // só usado se a chave do GitHub faltar (roda aqui mesmo)
 import { descontoConfiavel } from "@/lib/fichas/regras";
 import { categorias } from "@/lib/categorias";
-
-export const maxDuration = 300; // o botão "Rodar agora" pode levar alguns minutos
 
 async function rodarAgora(form: FormData) {
   "use server";
   await exigirDono();
   const tarefa = String(form.get("tarefa"));
-  const resultado = tarefa === "garimpo" ? await rodarGarimpo() : tarefa === "conferencia" ? await rodarConferencia() : "tarefa desconhecida";
-  redirect(`/admin?ok=${encodeURIComponent(`${tarefa === "garimpo" ? "Garimpo" : "Conferência"}: ${resultado}`)}`);
+  if (tarefa !== "garimpo" && tarefa !== "conferencia") return;
+  const nome = tarefa === "garimpo" ? "Garimpo" : "Conferência";
+  // Roda nas máquinas do GitHub (leva minutos; o site não precisa esperar)
+  if (await dispararWorkflow("automacoes.yml", { tarefa })) {
+    redirect(`/admin?ok=${encodeURIComponent(`${nome} chamado no GitHub: em 2 a 5 minutos o resultado aparece aqui (recarregue).`)}`);
+  }
+  // Sem a chave do GitHub: roda aqui mesmo (só funciona onde a página pode demorar, como na Vercel)
+  const resultado = tarefa === "garimpo" ? await rodarGarimpo() : await rodarConferencia();
+  redirect(`/admin?ok=${encodeURIComponent(`${nome}: ${resultado}`)}`);
 }
 
 async function salvarDescontoMinimo(form: FormData) {
@@ -73,12 +81,12 @@ async function alternar(form: FormData) {
 const SOBRE: Record<NomeAutomacao, { titulo: string; texto: string; rodar?: boolean }> = {
   garimpo: {
     titulo: "Garimpo",
-    texto: "Todo dia procura produtos no catálogo do Mercado Livre (buscas abaixo) e cria fichas quando o desconto é real e ≥ o mínimo.",
+    texto: "2x por dia (08:47 e 20:47) procura produtos no catálogo do Mercado Livre (buscas abaixo) e cria fichas quando o desconto é real e ≥ o mínimo.",
     rodar: true,
   },
   conferencia: {
     titulo: "Conferência de preços",
-    texto: "Todo dia confere as ofertas no ar: pausa quando o desconto acaba ou o anúncio some, republica quando volta.",
+    texto: "A cada 6 h confere as ofertas no ar: pausa quando o desconto acaba ou o anúncio some, republica quando volta.",
     rodar: true,
   },
   publicacao_automatica: {

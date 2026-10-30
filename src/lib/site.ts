@@ -4,3 +4,6 @@ export const site = {
   instagram: "#",
   contato: "#",
 };
+
+/** Link preenchido de verdade? Enquanto estiver "#", o botão não aparece no site. */
+export const temLink = (href: string) => Boolean(href) && href !== "#";

@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { categorias, imagemMascote, temaCategoria, type CategoriaSlug } from "@/lib/categorias";
-import { site } from "@/lib/site";
+import { site, temLink } from "@/lib/site";
 import { AlternarTema } from "./AlternarTema";
 import { Busca } from "./Busca";
 import { Icone } from "./Icone";
@@ -41,6 +41,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
           </div>
           <span className="flex-1 md:hidden" />
           <AlternarTema />
+          {temLink(site.whatsapp) && (
           <a
             href={site.whatsapp}
             target="_blank"
@@ -51,6 +52,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
             <span className="sr-only lg:hidden">Ofertas no WhatsApp</span>
             <Icone nome="whatsapp" tamanho={24} />
           </a>
+          )}
         </div>
         <div className="flex px-4 md:hidden">
           <Busca placeholder="Buscar achados" tamanho="md" valor={busca} />
@@ -92,6 +94,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
           <div className="hidden lg:block">
             <AlternarTema />
           </div>
+          {temLink(site.whatsapp) && (
           <a
             href={site.whatsapp}
             target="_blank"
@@ -103,6 +106,7 @@ export function Header({ categoriaAtiva, busca }: { categoriaAtiva?: CategoriaSl
             <span className="sr-only lg:hidden">Ofertas no WhatsApp</span>
             <Icone nome="whatsapp" tamanho={24} />
           </a>
+          )}
         </div>
       </div>
     </>

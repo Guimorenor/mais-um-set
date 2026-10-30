@@ -1,6 +1,7 @@
 // Prova técnica da API oficial do Mercado Livre (Etapa 3).
 // Só roda no servidor: as chaves vêm das variáveis de ambiente e nunca vão para o navegador.
 import "server-only";
+import { ehProducao } from "@/lib/ambiente";
 
 export const API = "https://api.mercadolibre.com";
 export const AUTORIZACAO = "https://auth.mercadolivre.com.br/authorization";
@@ -9,7 +10,7 @@ export const COOKIE_TOKEN = "ml_prova_token";
 
 /** A página de prova só existe fora da produção e com ML_PROVA_ATIVA=1. */
 export function provaHabilitada() {
-  return process.env.VERCEL_ENV !== "production" && process.env.ML_PROVA_ATIVA === "1";
+  return !ehProducao() && process.env.ML_PROVA_ATIVA === "1";
 }
 
 /** Mostra só SE as variáveis existem — nunca o valor. */

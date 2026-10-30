@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { categorias } from "@/lib/categorias";
-import { site } from "@/lib/site";
+import { site, temLink } from "@/lib/site";
 import { Icone } from "./Icone";
 
 const link = (slug: string) => `/?categoria=${slug}#achados`;
@@ -14,16 +14,17 @@ export function Footer() {
     {
       titulo: "Mais um Set",
       itens: [
-        { nome: "Como funciona", href: "#" },
         { nome: "Ofertas no WhatsApp", href: site.whatsapp },
         { nome: "Instagram", href: site.instagram },
         { nome: "Contato", href: site.contato },
-      ],
+      ].filter((i) => temLink(i.href)), // sem link real, o item some
+
     },
   ];
 
   return (
     <footer data-theme="dark" className="flex flex-col gap-8 bg-surface-default px-4 pt-10 pb-8 text-text-default md:gap-10 md:px-6 md:pt-12 md:pb-10 lg:gap-14 lg:px-20 lg:pt-20 lg:pb-10">
+      {temLink(site.whatsapp) && (
       <div className="flex flex-col gap-0 rounded-[28px] bg-surface-subtle px-5 py-6 md:rounded-[32px] md:p-10 lg:flex-row lg:items-center lg:justify-between lg:gap-8 lg:rounded-[40px] lg:px-14 lg:py-12">
         <div className="flex flex-col gap-3">
           <p className="text-200 font-bold tracking-wide text-text-brand">GRUPO DE OFERTAS · GRÁTIS</p>
@@ -43,6 +44,7 @@ export function Footer() {
           <Icone nome="whatsapp" tamanho={24} />
         </a>
       </div>
+      )}
 
       <div className="flex flex-col gap-0 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex flex-col gap-4 lg:w-[380px]">
@@ -52,7 +54,7 @@ export function Footer() {
           </p>
         </div>
         <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 md:flex md:gap-16 lg:mt-0 lg:gap-20">
-          {colunas.map((col) => (
+          {colunas.filter((col) => col.itens.length > 0).map((col) => (
             <div key={col.titulo} className="flex min-w-0 flex-col gap-3 md:whitespace-nowrap">
               <p className="text-150 font-bold tracking-wide text-text-subtlest uppercase">{col.titulo}</p>
               {col.itens.map((i) => (

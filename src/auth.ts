@@ -2,7 +2,7 @@
 // As chaves (AUTH_GITHUB_ID, AUTH_GITHUB_SECRET, AUTH_SECRET) ficam no cofre da Vercel.
 import NextAuth from "next-auth";
 import GitHub from "next-auth/providers/github";
-import { waitUntil } from "@vercel/functions";
+import { after } from "next/server";
 import { gravarErroLogin } from "@/lib/errosLogin";
 
 // Número da conta Guimorenor no GitHub. Usamos o número (e não o nome),
@@ -11,11 +11,16 @@ export const DONO_GITHUB_ID = "345960580";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [GitHub],
+  trustHost: true, // fora da Vercel (Netlify), o Auth.js precisa confiar no endereço do site
   // Erros do login vão para o banco (a tela "Entrar" mostra o motivo)
   logger: {
     error(erro) {
       console.error("[auth][error]", erro);
-      waitUntil(gravarErroLogin(erro));
+      try {
+        after(() => gravarErroLogin(erro)); // grava depois de responder
+      } catch {
+        void gravarErroLogin(erro);
+      }
     },
   },
   pages: { signIn: "/admin/entrar", error: "/admin/entrar" },

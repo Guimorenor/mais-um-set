@@ -1,0 +1,49 @@
+# Garimpo e conferência de preços (scripts/automacao.ts), nas máquinas do GitHub (grátis: repositório público).
+# Frequência: conferência a cada 6 h; garimpo 2x por dia. Também pelo botão "Rodar agora" do painel.
+# Pausar: no painel (Automações) ou aqui (Actions → Garimpo e conferência → Disable workflow).
+# No fim, chama o estagiário de imagens (recorte e enquadramento das fotos novas).
+name: Garimpo e conferência
+
+on:
+  schedule:
+    - cron: "17 */6 * * *" # conferência a cada 6 h (UTC)
+    - cron: "47 11,23 * * *" # garimpo + conferência às 08:47 e 20:47 de Brasília
+  workflow_dispatch:
+    inputs:
+      tarefa:
+        description: "garimpo, conferencia ou tudo"
+        required: false
+        default: "tudo"
+
+concurrency:
+  group: garimpo-e-conferencia
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  rodar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Rodar
+        run: node --conditions=react-server --import tsx scripts/automacao.ts "$TAREFA"
+        env:
+          TAREFA: ${{ github.event_name == 'workflow_dispatch' && inputs.tarefa || (github.event.schedule == '17 */6 * * *' && 'conferencia' || 'tudo') }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ML_CLIENT_ID: ${{ secrets.ML_CLIENT_ID }}
+          ML_CLIENT_SECRET: ${{ secrets.ML_CLIENT_SECRET }}
+          SEM_DISPARO: "1"
+
+  imagens:
+    needs: rodar
+    if: always()
+    uses: ./.github/workflows/recorte.yml
+    secrets: inherit

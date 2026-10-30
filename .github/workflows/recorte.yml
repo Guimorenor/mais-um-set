@@ -6,7 +6,8 @@ name: Recorte de fotos
 on:
   schedule:
     - cron: "23 */3 * * *" # a cada 3 h (horário UTC), no minuto 23
-  workflow_dispatch: # botão "Run workflow" no GitHub
+  workflow_dispatch: # botão "Run workflow" no GitHub e o painel (na hora)
+  workflow_call: # chamado no fim do garimpo/conferência
   push:
     branches: ["buscador/etapa-5-site"] # para testar antes de ir para a main
     paths: ["automacao/**", ".github/workflows/recorte.yml"]

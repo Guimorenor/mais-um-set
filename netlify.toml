@@ -1,0 +1,8 @@
+# Hospedagem na Netlify (plano grátis permite uso comercial / afiliados).
+# A Netlify detecta o Next.js sozinha; aqui só fixamos o comando e a versão do Node.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
