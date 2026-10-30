@@ -99,7 +99,7 @@ const SOBRE: Record<NomeAutomacao, { titulo: string; texto: string; rodar?: bool
   },
   recorte: {
     titulo: "Recorte das fotos dos destaques",
-    texto: "A cada 3 h, recorta o fundo das fotos dos 3 destaques do topo (máx. 5 por vez).",
+    texto: "Na hora em que a vitrine muda (e a cada 3 h, de reserva): recorta o fundo das fotos dos 3 destaques e ajusta o enquadramento das fotos novas.",
   },
 };
 const ORDEM: NomeAutomacao[] = [
