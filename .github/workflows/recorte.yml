@@ -1,0 +1,44 @@
+# Estagiário de edição: recorta o fundo das fotos das ofertas (automacao/recortar.py).
+# Frequência: a cada 3 horas. Limite: 5 fotos por vez (até 3 versões cada), 25 minutos no máximo.
+# Pausar: no painel (Automações → Recorte) ou aqui no GitHub (Actions → Recorte de fotos → Disable workflow).
+name: Recorte de fotos
+
+on:
+  schedule:
+    - cron: "23 */3 * * *" # a cada 3 h (horário UTC), no minuto 23
+  workflow_dispatch: # botão "Run workflow" no GitHub
+  push:
+    branches: ["buscador/etapa-5-site"] # para testar antes de ir para a main
+    paths: ["automacao/**", ".github/workflows/recorte.yml"]
+
+concurrency:
+  group: recorte-de-fotos
+  cancel-in-progress: false # nunca duas execuções ao mesmo tempo
+
+permissions:
+  contents: read
+
+jobs:
+  recortar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      REMBG_HOME: ${{ github.workspace }}/.modelos
+      LIMITE: "5"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: automacao/requirements.txt
+      - name: Guardar o modelo de recorte entre execuções
+        uses: actions/cache@v4
+        with:
+          path: .modelos
+          key: rembg-modelos-v2-isnet-birefnet
+      - run: pip install -r automacao/requirements.txt
+      - name: Recortar
+        run: python automacao/recortar.py
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
