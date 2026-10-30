@@ -120,7 +120,7 @@ async function recorte(form: FormData) {
   if (acao === "usar") await decidirRecorte(id, true);
   else if (acao === "recusar") await decidirRecorte(id, false);
   else await pedirRecorte(id);
-  voltar(id, "ok", acao === "usar" ? "Recorte aprovado." : acao === "recusar" ? "Recorte recusado: fica a foto original." : "Recorte pedido: entra na próxima execução (até 3 h).");
+  voltar(id, "ok", acao === "usar" ? "Recorte aprovado." : acao === "recusar" ? "Recorte recusado: fica a foto original." : process.env.GITHUB_ESTAGIARIO_TOKEN ? "Recorte pedido: o estagiário já foi chamado (fica pronto em 1–3 min)." : "Recorte pedido: entra na próxima execução (até 3 h).");
 }
 
 const ROTULO_ACAO: Partial<Record<Estado, string>> = {

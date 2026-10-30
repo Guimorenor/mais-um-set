@@ -3,6 +3,7 @@
 import "server-only";
 import type { Pool } from "@neondatabase/serverless";
 import { revalidateTag } from "next/cache";
+import { chamarEstagiario } from "@/lib/estagiario";
 import { comBanco } from "@/lib/db/conexao";
 import type { CategoriaSlug } from "@/lib/categorias";
 import { mudancas, podeMudarEstado, type Autor, type Destaque, type Estado, type Ficha, type Resultado } from "./regras";
@@ -189,6 +190,7 @@ export async function mudarEstado(id: string, para: Estado, autor: Autor, motivo
     await diario(pool, id, autor, "estado", motivo?.trim() ? [`motivo: ${motivo.trim()}`] : [], null, atual.ficha.estado, para);
   });
   atualizarVitrine();
+  if (para === "publicada" || atual.ficha.estado === "publicada") chamarEstagiario("vitrine mudou");
   return { ok: true };
 }
 
@@ -241,9 +243,10 @@ export async function decidirRecorte(id: string, usar: boolean) {
 export async function pedirRecorte(id: string) {
   await comBanco(async (pool) => {
     await pool.query("UPDATE fichas SET recorte_status = 'pendente', recorte_erro = NULL, usar_recorte = false WHERE id = $1", [id]);
-    await diario(pool, id, "moreno", "ok", ["recorte pedido: entra na próxima execução"], null, null, null);
+    await diario(pool, id, "moreno", "ok", ["recorte pedido"], null, null, null);
   });
   atualizarVitrine();
+  chamarEstagiario("recorte pedido");
 }
 
 // ── Garimpo automático (Etapa 6) ──────────────────────────────────────────────
@@ -266,6 +269,7 @@ export async function publicarPeloGarimpo(id: string, cfg: ConfigGarimpo, motivo
     await diario(pool, id, "automacao", "estado", [`publicada sozinha: ${motivo}`], null, atual.ficha.estado, "publicada");
   });
   atualizarVitrine();
+  chamarEstagiario("publicada pelo garimpo");
   return { ok: true };
 }
 
