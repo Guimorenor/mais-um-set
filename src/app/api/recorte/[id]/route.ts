@@ -4,6 +4,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { auth, DONO_GITHUB_ID } from "@/auth";
 import { comBanco, variavelDoBanco } from "@/lib/db/conexao";
+import { painelHabilitado } from "@/lib/painel";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -12,7 +13,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
   const previa = req.nextUrl.searchParams.get("previa") === "1";
   if (previa) {
-    if (process.env.VERCEL_ENV === "production") return naoTem();
+    if (!painelHabilitado()) return naoTem();
     const sessao = await auth();
     if (sessao?.user?.githubId !== DONO_GITHUB_ID) return naoTem();
   }

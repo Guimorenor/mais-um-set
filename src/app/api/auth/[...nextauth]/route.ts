@@ -2,8 +2,7 @@ import { NextResponse } from "next/server";
 import { handlers } from "@/auth";
 
 const fechado = () => new NextResponse("Não encontrado", { status: 404 });
-const naProducao = process.env.VERCEL_ENV === "production";
-
-// O login só existe nas versões de teste, por enquanto
-export const GET = naProducao ? fechado : handlers.GET;
-export const POST = naProducao ? fechado : handlers.POST;
+// O login só existe onde o painel existe (teste sempre; site oficial só com PAINEL_EM_PRODUCAO=1)
+const fechadoAqui = process.env.VERCEL_ENV === "production" && process.env.PAINEL_EM_PRODUCAO !== "1";
+export const GET = fechadoAqui ? fechado : handlers.GET;
+export const POST = fechadoAqui ? fechado : handlers.POST;
